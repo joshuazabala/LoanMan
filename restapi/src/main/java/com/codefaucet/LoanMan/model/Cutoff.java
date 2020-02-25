@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.codefaucet.LoanMan.common.CutoffStatus;
+import com.codefaucet.LoanMan.common.EnumCutoffStatus;
 
 @Entity
 @Table(name = "cutoffs", uniqueConstraints = @UniqueConstraint(columnNames = { "cutoff_profile_id", "year", "month",
@@ -27,7 +27,7 @@ public class Cutoff {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(16) not null default 'DRAFT'")
-    private CutoffStatus status;
+    private EnumCutoffStatus status;
 
     @ManyToOne
     @JoinColumn(name = "cutoff_profile_id", nullable = false)
@@ -49,16 +49,16 @@ public class Cutoff {
     private int cutoffNumber;
 
     public Cutoff() {
-	this(CutoffStatus.DRAFT, null, LocalDate.now(), LocalDate.now().plusMonths(1), LocalDate.now().getYear(),
+	this(EnumCutoffStatus.DRAFT, null, LocalDate.now(), LocalDate.now().plusMonths(1), LocalDate.now().getYear(),
 		LocalDate.now().getMonthValue(), 1);
     }
 
-    public Cutoff(CutoffStatus status, CutoffProfile cutoffProfile, LocalDate startDate, LocalDate endDate, int year,
+    public Cutoff(EnumCutoffStatus status, CutoffProfile cutoffProfile, LocalDate startDate, LocalDate endDate, int year,
 	    int month, int cutoffNumber) {
 	this(0L, status, cutoffProfile, startDate, endDate, year, month, cutoffNumber);
     }
 
-    public Cutoff(Long id, CutoffStatus status, CutoffProfile cutoffProfile, LocalDate startDate, LocalDate endDate,
+    public Cutoff(Long id, EnumCutoffStatus status, CutoffProfile cutoffProfile, LocalDate startDate, LocalDate endDate,
 	    int year, int month, int cutoffNumber) {
 	this.id = id;
 	this.status = status;
@@ -78,11 +78,11 @@ public class Cutoff {
 	this.id = id;
     }
 
-    public CutoffStatus getStatus() {
+    public EnumCutoffStatus getStatus() {
 	return status;
     }
 
-    public void setStatus(CutoffStatus status) {
+    public void setStatus(EnumCutoffStatus status) {
 	this.status = status;
     }
 

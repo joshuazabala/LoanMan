@@ -14,7 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.codefaucet.LoanMan.common.CutoffFrequency;
+import com.codefaucet.LoanMan.common.EnumCutoffFrequency;
 
 @Entity
 @Table(name = "cutoff_profiles")
@@ -29,7 +29,7 @@ public class CutoffProfile {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(16) not null default 'MONTHLY'")
-    private CutoffFrequency frequency;
+    private EnumCutoffFrequency frequency;
 
     @Column(length = 16, nullable = false, unique = true)
     private String code;
@@ -46,7 +46,7 @@ public class CutoffProfile {
     @OneToMany(mappedBy = "cutoffProfile", cascade = CascadeType.ALL)
     private List<Cutoff> cutoffs;
 
-    public CutoffProfile(Long id, boolean active, CutoffFrequency frequency, String code, String description,
+    public CutoffProfile(Long id, boolean active, EnumCutoffFrequency frequency, String code, String description,
 	    int firstHalfStart, int secondHalfStart) {
 	this.id = id;
 	this.active = active;
@@ -59,13 +59,13 @@ public class CutoffProfile {
 	cutoffs = new ArrayList<>();
     }
 
-    public CutoffProfile(CutoffFrequency frequency, String code, String description, int firstHalfStart,
+    public CutoffProfile(EnumCutoffFrequency frequency, String code, String description, int firstHalfStart,
 	    int secondHalfStart) {
 	this(0L, true, frequency, code, description, firstHalfStart, secondHalfStart);
     }
 
     public CutoffProfile() {
-	this(CutoffFrequency.MONTHLY, "", "", 1, 16);
+	this(EnumCutoffFrequency.MONTHLY, "", "", 1, 16);
     }
 
     public Long getId() {
@@ -84,11 +84,11 @@ public class CutoffProfile {
 	this.active = active;
     }
 
-    public CutoffFrequency getFrequency() {
+    public EnumCutoffFrequency getFrequency() {
 	return frequency;
     }
 
-    public void setFrequency(CutoffFrequency frequency) {
+    public void setFrequency(EnumCutoffFrequency frequency) {
 	this.frequency = frequency;
     }
 

@@ -17,7 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.codefaucet.LoanMan.common.LoanStatus;
+import com.codefaucet.LoanMan.common.EnumLoanStatus;
 
 @Entity
 @Table(name = "loans")
@@ -32,7 +32,7 @@ public class Loan {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(16) not null default 'ACTIVE'")
-    private LoanStatus status;
+    private EnumLoanStatus status;
 
     @Column(columnDefinition = "decimal(18, 4) not null default 0")
     private double principal;
@@ -67,7 +67,7 @@ public class Loan {
     @JoinColumn(name = "cutoff_profile_id", nullable = false)
     private CutoffProfile cutoffProfile;
 
-    public Loan(Long id, boolean active, LoanStatus status, double principal, double interest, double initialPayment,
+    public Loan(Long id, boolean active, EnumLoanStatus status, double principal, double interest, double initialPayment,
 	    int terms, LocalDate loanDate, LocalDate paymentStartDate) {
 	this.id = id;
 	this.active = active;
@@ -84,7 +84,7 @@ public class Loan {
 
     public Loan(double principal, double interest, double initialPayment, int terms, LocalDate loanDate,
 	    LocalDate paymentStartDate) {
-	this(0L, true, LoanStatus.ACTIVE, principal, interest, initialPayment, terms, loanDate, paymentStartDate);
+	this(0L, true, EnumLoanStatus.ACTIVE, principal, interest, initialPayment, terms, loanDate, paymentStartDate);
     }
 
     public Loan() {
@@ -107,11 +107,11 @@ public class Loan {
 	this.active = deleted;
     }
 
-    public LoanStatus getStatus() {
+    public EnumLoanStatus getStatus() {
 	return status;
     }
 
-    public void setStatus(LoanStatus status) {
+    public void setStatus(EnumLoanStatus status) {
 	this.status = status;
     }
 
