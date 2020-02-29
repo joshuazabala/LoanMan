@@ -16,22 +16,32 @@ public interface IGroupTypeRepository extends JpaRepository<GroupType, Long> {
     @Query(
 	    "select gt from GroupType gt "
 	    + "where "
-	    + "("
+	    + "( "
 	    + "gt.code like '%' || :queryString || '%' "
-	    + "or gt.name like '%' || :queryString || '%'"
+	    + "or gt.description like '%' || :queryString || '%' "
 	    + ") "
 	    + "and gt.active in :statuses")
     public List<GroupType> search(@Param("queryString") String queryString, @Param("statuses") List<Boolean> statuses,
 	    Pageable pageable);
 
     @Query(
+	    "select count(gt) from GroupType gt "
+	    + "where "
+	    + "( "
+	    + "gt.code like '%' || :queryString || '%' "
+	    + "or gt.description like '%' || :queryString || '%' "
+	    + ") "
+	    + "and gt.active in :statuses")
+    public Long countSearchResult(@Param("queryString") String queryString, @Param("statuses") List<Boolean> statuses);
+    
+    @Query(
 	    "select gt from GroupType gt "
 	    + "where "
-	    + "("
+	    + "( "
 	    + "gt.code like '%' || :queryString || '%' "
-	    + "or gt.name like '%' || :queryString || '%'"
+	    + "or gt.description like '%' || :queryString || '%' "
 	    + ") "
-	    + "and gt.active in :statuses"
+	    + "and gt.active in :statuses "
 	    + "and gt.id not in :excludedIds")
     public List<GroupType> search(@Param("queryString") String queryString, @Param("statuses") List<Boolean> statuses,
 	    @Param("excludedIds") List<Long> excludedIds, Pageable pageable);

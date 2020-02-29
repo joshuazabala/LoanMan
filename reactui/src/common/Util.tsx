@@ -18,4 +18,12 @@ export default class Util {
         return false;
     }
 
+    public static objectToMap = (model: any) => {
+        const map = new Map<string, string>();
+        Object.keys(model).forEach(key => {
+            map.set(key, model[key]);
+        });
+        return map;
+    }
+
 }

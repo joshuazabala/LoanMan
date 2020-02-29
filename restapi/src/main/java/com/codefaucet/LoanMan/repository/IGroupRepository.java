@@ -18,7 +18,7 @@ public interface IGroupRepository extends JpaRepository<Group, Long> {
 	    + "where "
 	    + "("
 	    + "g.code like '%' || :queryString || '%' "
-	    + "or g.name like '%' || :queryString || '%'"
+	    + "or g.description like '%' || :queryString || '%'"
 	    + ") "
 	    + "and g.active in :statuses "
 	    + "and g.type.id = :groupTypeId")
@@ -30,7 +30,7 @@ public interface IGroupRepository extends JpaRepository<Group, Long> {
 	    + "where "
 	    + "("
 	    + "g.code like '%' || :queryString || '%' "
-	    + "or g.name like '%' || :queryString || '%'"
+	    + "or g.description like '%' || :queryString || '%'"
 	    + ") "
 	    + "and g.active in :statuses "
 	    + "and g.type.id = :groupTypeId "

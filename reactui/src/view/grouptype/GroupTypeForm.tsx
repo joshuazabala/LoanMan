@@ -92,7 +92,7 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
     private onInputChange = (event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) => {
         const content = this.state.content;
         if (data.fieldname === "code") {
-            content.code = data.value;
+            content.code = data.value.toUpperCase();
         } else if (data.fieldname === "description") {
             content.description = data.value;
         }

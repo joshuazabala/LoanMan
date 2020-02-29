@@ -1,10 +1,15 @@
 package com.codefaucet.LoanMan.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -24,11 +29,16 @@ public class LoanType {
     @Column(length = 528, nullable = false)
     private String description;
 
+    @OneToMany(mappedBy = "loanType", fetch = FetchType.LAZY)
+    private List<Loan> loans;
+
     public LoanType(Long id, boolean deleted, String code, String name, String description) {
 	this.id = id;
 	this.active = deleted;
 	this.code = code;
 	this.description = description;
+	
+	loans = new ArrayList<Loan>();
     }
 
     public LoanType(String code, String name, String description) {
@@ -69,6 +79,14 @@ public class LoanType {
 
     public void setDescription(String description) {
 	this.description = description;
+    }
+
+    public List<Loan> getLoans() {
+	return loans;
+    }
+
+    public void setLoans(List<Loan> loans) {
+	this.loans = loans;
     }
 
 }
