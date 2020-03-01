@@ -1,9 +1,22 @@
 import * as React from 'react';
+import {
+    Button,
+    Form,
+    FormButton,
+    FormInput,
+    FormProps,
+    InputOnChangeData,
+    Message,
+    Modal,
+    ModalActions,
+    ModalContent,
+    ModalHeader,
+} from 'semantic-ui-react';
+
 import IFormProps from '../../common/IFormProps';
 import IFormState from '../../common/IFormState';
-import GroupType from '../../model/GroupType';
-import { Modal, ModalHeader, ModalContent, Form, FormInput, FormButton, ModalActions, Button, FormProps, InputOnChangeData } from 'semantic-ui-react';
 import Util from '../../common/Util';
+import GroupType from '../../model/GroupType';
 
 export default class GroupTypeForm extends React.Component<IFormProps, IFormState<GroupType>> {
 
@@ -39,6 +52,12 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
                             disabled={this.state.loading}
                             error={this.state.errorMap.get("description")}
                         />
+                        {
+                            !Util.isBlankOrNullString(this.state.errorMessage) &&
+                            <Message error={true}>
+                                {this.state.errorMessage}
+                            </Message>
+                        }
                         <FormButton
                             style={{ display: "none" }}
                         />

@@ -51,4 +51,7 @@ public interface IGroupTypeRepository extends JpaRepository<GroupType, Long> {
     @Query("select size(gt.groups) from GroupType gt where gt = :groupType")
     public Long countActiveGroups(@Param("groupType") GroupType groupType);
 
+    @Query("select size(gt.groups) from GroupType gt where gt.id = :id")
+    public long getGroupCount(long id);
+
 }

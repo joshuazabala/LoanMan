@@ -6,6 +6,7 @@ import {
     FormInput,
     FormProps,
     InputOnChangeData,
+    Message,
     Modal,
     ModalActions,
     ModalContent,
@@ -14,8 +15,8 @@ import {
 
 import IFormProps from '../../common/IFormProps';
 import IFormState from '../../common/IFormState';
-import LoanType from '../../model/LoanType';
 import Util from '../../common/Util';
+import LoanType from '../../model/LoanType';
 
 export default class LoanTypeForm extends React.Component<IFormProps, IFormState<LoanType>> {
 
@@ -51,6 +52,12 @@ export default class LoanTypeForm extends React.Component<IFormProps, IFormState
                             disabled={this.state.loading}
                             error={this.state.errorMap.get("description")}
                         />
+                        {
+                            !Util.isBlankOrNullString(this.state.errorMessage) &&
+                            <Message error={true}>
+                                {this.state.errorMessage}
+                            </Message>
+                        }
                         <FormButton
                             style={{ display: "none" }}
                         />

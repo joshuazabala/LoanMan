@@ -21,10 +21,21 @@ public interface IGroupRepository extends JpaRepository<Group, Long> {
 	    + "or g.description like '%' || :queryString || '%'"
 	    + ") "
 	    + "and g.active in :statuses "
-	    + "and g.type.id = :groupTypeId")
+	    + "and (:groupTypeId = 0 or g.type.id = :groupTypeId)")
     public List<Group> search(@Param("queryString") String queryString, @Param("statuses") List<Boolean> statuses,
-	    @Param("groupTypeId") Long groupTypeId, Pageable pageable);
+	    @Param("groupTypeId") int groupTypeId, Pageable pageable);
 
+    @Query(
+	    "select count(1) from Group g "
+	    + "where "
+	    + "("
+	    + "g.code like '%' || :queryString || '%' "
+	    + "or g.description like '%' || :queryString || '%'"
+	    + ") "
+	    + "and g.active in :statuses "
+	    + "and (:groupTypeId = 0 or g.type.id = :groupTypeId)")
+    public long countSearchResult(String queryString, List<Boolean> statuses, int groupTypeId);
+    
     @Query(
 	    "select g from Group g "
 	    + "where "
@@ -39,5 +50,8 @@ public interface IGroupRepository extends JpaRepository<Group, Long> {
 	    @Param("groupTypeId") Long groupTypeId, @Param("excludedIds") List<Long> excludedIds, Pageable pageable);
     
     public Group findByCode(String code);
+
+    @Query("select size(g.clients) from Group g where g.id = :id")
+    public long getMemberCount(long id);
 
 }

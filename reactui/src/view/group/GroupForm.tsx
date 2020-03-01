@@ -10,6 +10,7 @@ import {
     FormInput,
     FormProps,
     InputOnChangeData,
+    Message,
     Modal,
     ModalActions,
     ModalContent,
@@ -18,8 +19,12 @@ import {
 
 import IFormProps from '../../common/IFormProps';
 import IFormState from '../../common/IFormState';
+import PagedSearchRequest from '../../common/PagedSearchRequest';
+import PagedSearchResponse from '../../common/PagedSearchResponse';
+import { fetchPost } from '../../common/Request';
 import Util from '../../common/Util';
 import Group from '../../model/Group';
+import GroupType from '../../model/GroupType';
 
 interface IState extends IFormState<Group> {
     groupTypes: DropdownItemProps[]
@@ -35,6 +40,10 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
         groupTypes: new Array<DropdownItemProps>()
     }
 
+    public componentDidMount() {
+        this.getGroupTypes("");
+    }
+
     private groupTypeSearchTimeout: number = 0;
 
     public render() {
@@ -44,6 +53,7 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
                 <ModalContent>
                     <Form onSubmit={this.onSubmit}>
                         <FormDropdown 
+                            fluid={true}
                             label="Group Type"
                             options={this.state.groupTypes}
                             value={this.state.content.groupTypeId}
@@ -51,6 +61,9 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
                             onSearchChange={this.onGroupTypeSearch}
                             search={true}
                             selection={true}
+                            onClick={this.onGroupTypeSearchClick}
+                            disabled={this.state.loading}
+                            error={this.state.errorMap.get("groupTypeId")}
                         />
                         <FormInput
                             label="Code"
@@ -71,6 +84,12 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
                             disabled={this.state.loading}
                             error={this.state.errorMap.get("description")}
                         />
+                        {
+                            !Util.isBlankOrNullString(this.state.errorMessage) &&
+                            <Message error={true}>
+                                {this.state.errorMessage}
+                            </Message>
+                        }
                         <FormButton
                             style={{ display: "none" }}
                         />
@@ -111,6 +130,9 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
         if (Util.isBlankOrNullString(content.description)) {
             errorMap.set("description", "Description is required.");
         }
+        if (content.groupTypeId === 0) {
+            errorMap.set("groupTypeId", "Type is required.");
+        }
         this.setState(
             { errorMap },
             () => {
@@ -138,21 +160,41 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
     }
 
     private onGroupTypeSearch = (event: React.SyntheticEvent<HTMLElement>, data: DropdownOnSearchChangeData) => {
+        this.getGroupTypes(data.searchQuery);
+    }
+
+    private getGroupTypes = (queryString: string) => {
         clearTimeout(this.groupTypeSearchTimeout);
         this.groupTypeSearchTimeout = window.setTimeout(() => {
-            const groupTypes = new Array<DropdownItemProps>();
-            groupTypes.push({
-                key: 1,
-                value: 1,
-                text: "Position"
+            const requestParam = new PagedSearchRequest();
+            requestParam.includeInactive = false;
+            requestParam.pageNumber = 1;
+            requestParam.pageSize = 20;
+            requestParam.queryString = queryString;
+
+            fetchPost<PagedSearchRequest, PagedSearchResponse<GroupType>>("/grouptype/search", requestParam)
+            .then(result => {
+                const groupTypes = new Array<DropdownItemProps>();
+                result.content.forEach(item => {
+                    groupTypes.push({
+                        key: item.id,
+                        value: item.id,
+                        text: item.code + " - " + item.description
+                    });
+                });
+                this.setState({ groupTypes });
             });
-            groupTypes.push({
-                key: 2,
-                value: 2,
-                text: "Company"
-            });
-            this.setState({ groupTypes });
-        }, 100);
+        }, 200);
+    }
+
+    private onGroupTypeSearchClick = (event: React.KeyboardEvent<HTMLElement>, data: DropdownProps) => {
+        if (!event.currentTarget.firstChild) {
+            return;
+        }
+        const node = (event.currentTarget.firstChild! as unknown) as { value: string };
+        if (node !== undefined) {
+            this.getGroupTypes(node.value);
+        }
     }
 
 }

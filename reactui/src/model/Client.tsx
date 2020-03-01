@@ -1,8 +1,7 @@
 export default class Client {
  
-    public id: number;
+    public id: string;
     public active: boolean;
-    public clientNumber: string;
     public lastName: string;
     public firstName: string;
     public middleName: string;
@@ -11,9 +10,8 @@ export default class Client {
     public address: string;
 
     public constructor() {
-        this.id = 0;
+        this.id = "";
         this.active = true;
-        this.clientNumber = "";
         this.lastName = "";
         this.firstName = "";
         this.middleName = "";

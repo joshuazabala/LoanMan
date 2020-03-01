@@ -88,4 +88,9 @@ public class GroupType {
 	this.groups = groups;
     }
 
+    @Override
+    public String toString() {
+	return code + " - " + description;
+    }
+
 }

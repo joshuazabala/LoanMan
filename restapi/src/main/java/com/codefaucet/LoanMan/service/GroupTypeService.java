@@ -1,8 +1,11 @@
 package com.codefaucet.LoanMan.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
@@ -27,11 +30,11 @@ public class GroupTypeService {
 	return groupTypeRepository.countSearchResult(param.getQueryString(), param.createStatusFilter());
     }
 
-    public GroupType findGroupTypeById(long id) {
+    public GroupType findById(long id) {
 	return groupTypeRepository.findById(id).get();
     }
 
-    public GroupType findGroupTypeByCode(String code) {
+    public GroupType findByCode(String code) {
 	return groupTypeRepository.findByCode(code);
     }
 
@@ -39,9 +42,22 @@ public class GroupTypeService {
 	return groupTypeRepository.save(groupType);
     }
 
-    public void deleteGroupTypeById(long id) {
+    public void deleteById(long id) {
 	GroupType groupType = groupTypeRepository.findById(id).get();
 	groupTypeRepository.delete(groupType);
+    }
+
+    public List<GroupType> listGroupTypes() {
+	Sort sort = Sort.by(Order.asc("code"));
+	Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
+	List<Boolean> statusFilter = new ArrayList<Boolean>();
+	statusFilter.add(true);
+	List<GroupType> groupTypes = groupTypeRepository.search("", statusFilter, pageable);
+	return groupTypes;
+    }
+
+    public long getGroupCount(long id) {
+	return groupTypeRepository.getGroupCount(id);
     }
     
 }

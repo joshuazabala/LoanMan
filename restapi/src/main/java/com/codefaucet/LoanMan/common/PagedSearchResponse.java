@@ -52,5 +52,26 @@ public class PagedSearchResponse<T> {
     public void setMessage(String message) {
 	this.message = message;
     }
+    
+    public PagedSearchResponse<T> successful(List<T> content, long totalPageCount) {
+	this.content = content;
+	this.totalPageCount = totalPageCount;
+	status = EnumResponseStatus.SUCCESSFUL;
+	return this;
+    }
 
+    public PagedSearchResponse<T> successful() {
+	return this.successful(getContent(), getTotalPageCount());
+    }
+    
+    public PagedSearchResponse<T> failed(String message) {
+	this.message = message;
+	status = EnumResponseStatus.FAILED;
+	return this;
+    }
+    
+    public PagedSearchResponse<T> failed() {
+	return this.failed("");
+    }
+    
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codefaucet.LoanMan.common.EnumResponseStatus;
+import com.codefaucet.LoanMan.common.LoggingHelper;
 import com.codefaucet.LoanMan.common.PagedSearchRequest;
 import com.codefaucet.LoanMan.common.PagedSearchResponse;
 import com.codefaucet.LoanMan.common.RequestContainer;
@@ -33,6 +34,9 @@ public class LoanTypeController {
     
     private final Logger logger = LogManager.getLogger();
     
+    @Autowired
+    private LoggingHelper loggingHelper;
+    
     @GetMapping("/testInsertData")
     public void testInsertData() {
 	for (int a = 0; a < 129; a++) {
@@ -45,7 +49,7 @@ public class LoanTypeController {
     
     @PostMapping("/search")
     public PagedSearchResponse<LoanTypeDTO> search(@RequestBody PagedSearchRequest param) {
-	logger.debug("search | param: " + param.toString());
+	logger.debug("search | param: " + loggingHelper.asString(param));
 	
 	PagedSearchResponse<LoanTypeDTO> response = new PagedSearchResponse<LoanTypeDTO>();
 	
@@ -69,7 +73,7 @@ public class LoanTypeController {
     
     @PostMapping("/findById")
     public LoanTypeDTO findById(@RequestBody Map<String, Long> param) {
-	logger.debug("findById | param: " + param);
+	logger.debug("findById | param: " + loggingHelper.asString(param));
 	
 	long id = param.get("id");
 	LoanType loanType = id == 0 ? new LoanType() : loanTypeService.findById(id);
@@ -79,7 +83,7 @@ public class LoanTypeController {
     
     @PostMapping("/save")
     public ResponseContainer<LoanTypeDTO> save(@RequestBody RequestContainer<LoanTypeDTO> param) {
-	logger.debug("save | param: " + param);
+	logger.debug("save | param: " + loggingHelper.asString(param));
 	
 	ResponseContainer<LoanTypeDTO> response = new ResponseContainer<LoanTypeDTO>();
 	try {
@@ -132,7 +136,7 @@ public class LoanTypeController {
     
     @PostMapping("delete")
     public ResponseContainer<Boolean> delete(@RequestBody RequestContainer<Long> param) {
-	logger.debug("delete | param: " + param);
+	logger.debug("delete | param: " + loggingHelper.asString(param));
 	
 	ResponseContainer<Boolean> response = new ResponseContainer<Boolean>();
 	long id = param.getContent();

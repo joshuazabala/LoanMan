@@ -11,37 +11,39 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "clients")
 public class Client {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_seq")
+    @GenericGenerator(name = "client_seq", strategy = "com.codefaucet.LoanMan.common.ClientNumberGenerator")
+    @Column(length = 12)
+    private String id;
 
     @Column(columnDefinition = "tinyint(1) not null default 1")
     private boolean active;
 
-    @Column(length = 16, nullable = false, unique = true)
-    private String clientNumber;
-    
     @Column(length = 32, nullable = false)
     private String lastName;
-    
+
     @Column(length = 32, nullable = false)
     private String firstName;
-    
+
     @Column(length = 32)
     private String middleName;
-    
+
     @Column(length = 64)
     private String contactNumber;
-    
+
     @Column(length = 128)
     private String emailAddress;
-    
+
     @Column(columnDefinition = "varchar(512)")
     private String address;
 
@@ -49,25 +51,28 @@ public class Client {
     @JoinTable(name = "clients_groups", joinColumns = { @JoinColumn(name = "client_id") }, inverseJoinColumns = {
 	    @JoinColumn(name = "group_id") })
     private List<Group> groups;
-    
-    public Client(Long id, boolean active, String clientNumber, String lastName, String firstName, String middleName,
-	    String contactNumber, String emailAddress, String address) {
+
+    @OneToMany(mappedBy = "client")
+    private List<Loan> loans;
+
+    public Client(String id, boolean active, String lastName, String firstName, String middleName, String contactNumber,
+	    String emailAddress, String address) {
 	this.id = id;
 	this.active = active;
-	this.clientNumber = clientNumber;
 	this.lastName = lastName;
 	this.firstName = firstName;
 	this.middleName = middleName;
 	this.contactNumber = contactNumber;
 	this.emailAddress = emailAddress;
 	this.address = address;
-	
+
 	groups = new ArrayList<Group>();
+	loans = new ArrayList<Loan>();
     }
 
     public Client(String clientNumber, String lastName, String firstName, String middleName, String contactNumber,
 	    String emailAddress, String address) {
-	this(0L, true, clientNumber, lastName, firstName, middleName, contactNumber, emailAddress, address);
+	this("", true, lastName, firstName, middleName, contactNumber, emailAddress, address);
     }
 
     public Client() {
@@ -78,11 +83,11 @@ public class Client {
 	return getLastName() + ", " + getFirstName() + " " + getMiddleName();
     }
 
-    public Long getId() {
+    public String getId() {
 	return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
 	this.id = id;
     }
 
@@ -92,14 +97,6 @@ public class Client {
 
     public void setActive(boolean deleted) {
 	this.active = deleted;
-    }
-
-    public String getClientNumber() {
-	return clientNumber;
-    }
-
-    public void setClientNumber(String code) {
-	this.clientNumber = code;
     }
 
     public String getLastName() {
@@ -151,11 +148,19 @@ public class Client {
     }
 
     public List<Group> getGroups() {
-        return groups;
+	return groups;
     }
 
     public void setGroups(List<Group> groups) {
-        this.groups = groups;
+	this.groups = groups;
+    }
+
+    public List<Loan> getLoans() {
+	return loans;
+    }
+
+    public void setLoans(List<Loan> loans) {
+	this.loans = loans;
     }
 
 }

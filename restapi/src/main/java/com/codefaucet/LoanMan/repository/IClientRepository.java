@@ -11,24 +11,37 @@ import org.springframework.stereotype.Repository;
 import com.codefaucet.LoanMan.model.Client;
 
 @Repository
-public interface IClientRepository extends JpaRepository<Client, Long> {
+public interface IClientRepository extends JpaRepository<Client, String> {
 
     @Query(
 	    "select c from Client c "
 	    + "where "
 	    + "("
-	    + "c.clientNumber like concat(:needle, '%') "
-	    + "or c.firstName like concat(:needle, '%') "
-	    + "or c.middleName like concat(:needle, '%') "
-	    + "or c.lastName like concat(:needle, '%')"
+	    + "c.id like concat(:queryString, '%') "
+	    + "or c.firstName like concat(:queryString, '%') "
+	    + "or c.middleName like concat(:queryString, '%') "
+	    + "or c.lastName like concat(:queryString, '%')"
 	    + ") "
 	    + "and c.active in :statuses")
-    public List<Client> search(@Param("needle") String needle, @Param("statuses") List<Boolean> statuses,
+    public List<Client> search(@Param("queryString") String queryString, @Param("statuses") List<Boolean> statuses,
 	    Pageable pageable);
 
     @Query("select count(distinct c.id) from Client c join c.groups g where c.active = true and g.id = :groupId")
     public Long countActiveByGroupId(@Param("groupId") Long groupId);
 
-    public Client findByClientNumber(String clientNumber);
+    @Query(
+	    "select count(c) from Client c "
+	    + "where "
+	    + "("
+	    + "c.id like concat(:queryString, '%') "
+	    + "or c.firstName like concat(:queryString, '%') "
+	    + "or c.middleName like concat(:queryString, '%') "
+	    + "or c.lastName like concat(:queryString, '%')"
+	    + ") "
+	    + "and c.active in :statuses")
+    public long countSearchResult(String queryString, List<Boolean> statuses);
+
+    @Query("select size(c.loans) from Client c where c.id = :id")
+    public long getLoanCount(String id);
 
 }
