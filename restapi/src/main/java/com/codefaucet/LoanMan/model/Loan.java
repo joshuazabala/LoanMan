@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -27,32 +26,29 @@ public class Loan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "tinyint(1) not null default 1")
-    private boolean active;
-
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(16) not null default 'ACTIVE'")
     private EnumLoanStatus status;
 
     @Column(columnDefinition = "decimal(18, 4) not null default 0")
     private double principal;
-    
+
     @Column(columnDefinition = "decimal(18, 4) not null default 0")
-    private double interest;
-    
+    private double payable;
+
     @Column(columnDefinition = "decimal(18, 4) not null default 0")
-    private double initialPayment;
-    
+    private double amortization;
+
     @Column(columnDefinition = "date not null")
     private LocalDate loanDate;
-    
+
     @Column(columnDefinition = "date not null")
     private LocalDate paymentStartDate;
 
-    @Column(columnDefinition = "integer not null default 12")
-    private int terms;
+    @Column(length = 2048)
+    private String remarks;
 
-    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "loan")
     private List<Payment> payments;
 
     @ManyToOne
@@ -63,32 +59,26 @@ public class Loan {
     @JoinColumn(name = "loan_type_id", nullable = false)
     private LoanType loanType;
 
-    @ManyToOne
-    @JoinColumn(name = "cutoff_profile_id", nullable = false)
-    private CutoffProfile cutoffProfile;
-
-    public Loan(Long id, boolean active, EnumLoanStatus status, double principal, double interest, double initialPayment,
-	    int terms, LocalDate loanDate, LocalDate paymentStartDate) {
+    public Loan(Long id, EnumLoanStatus status, double principal, double payable, double amortization,
+	    LocalDate loanDate, LocalDate paymentStartDate, String remarks) {
 	this.id = id;
-	this.active = active;
 	this.status = status;
 	this.principal = principal;
-	this.interest = interest;
-	this.initialPayment = initialPayment;
-	this.terms = terms;
+	this.payable = payable;
+	this.amortization = amortization;
 	this.loanDate = loanDate;
 	this.paymentStartDate = paymentStartDate;
+	this.remarks = remarks;
 
 	payments = new ArrayList<>();
     }
 
-    public Loan(double principal, double interest, double initialPayment, int terms, LocalDate loanDate,
-	    LocalDate paymentStartDate) {
-	this(0L, true, EnumLoanStatus.ACTIVE, principal, interest, initialPayment, terms, loanDate, paymentStartDate);
+    public Loan(double principal, double payable, double amortization, LocalDate loanDate, LocalDate paymentStartDate, String remarks) {
+	this(0L, EnumLoanStatus.ACTIVE, principal, payable, amortization, loanDate, paymentStartDate, remarks);
     }
 
     public Loan() {
-	this(0, 0, 0, 12, LocalDate.now(), LocalDate.now());
+	this(0d, 0d, 0d, LocalDate.now(), LocalDate.now(), "");
     }
 
     public Long getId() {
@@ -97,14 +87,6 @@ public class Loan {
 
     public void setId(Long id) {
 	this.id = id;
-    }
-
-    public boolean isActive() {
-	return active;
-    }
-
-    public void setActive(boolean deleted) {
-	this.active = deleted;
     }
 
     public EnumLoanStatus getStatus() {
@@ -121,30 +103,6 @@ public class Loan {
 
     public void setPrincipal(double principal) {
 	this.principal = principal;
-    }
-
-    public double getInterest() {
-	return interest;
-    }
-
-    public void setInterest(double interest) {
-	this.interest = interest;
-    }
-
-    public double getInitialPayment() {
-	return initialPayment;
-    }
-
-    public void setInitialPayment(double initialPayment) {
-	this.initialPayment = initialPayment;
-    }
-
-    public int getTerms() {
-	return terms;
-    }
-
-    public void setTerms(int terms) {
-	this.terms = terms;
     }
 
     public LocalDate getLoanDate() {
@@ -187,16 +145,28 @@ public class Loan {
 	this.loanType = loanType;
     }
 
-    public CutoffProfile getCutoffProfile() {
-	return cutoffProfile;
-    }
-
-    public void setCutoffProfile(CutoffProfile cutoffProfile) {
-	this.cutoffProfile = cutoffProfile;
-    }
-
     public double getPayable() {
-	return getPrincipal() + (getPrincipal() * (getInterest() / 100));
+	return payable;
+    }
+
+    public void setPayable(double payable) {
+	this.payable = payable;
+    }
+
+    public double getAmortization() {
+	return amortization;
+    }
+
+    public void setAmortization(double amortization) {
+	this.amortization = amortization;
+    }
+
+    public String getRemarks() {
+	return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+	this.remarks = remarks;
     }
 
 }

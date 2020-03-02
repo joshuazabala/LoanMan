@@ -9,15 +9,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.codefaucet.LoanMan.common.EnumCutoffFrequency;
 import com.codefaucet.LoanMan.common.EnumCutoffStatus;
 
 @Entity
-@Table(name = "cutoffs", uniqueConstraints = @UniqueConstraint(columnNames = { "cutoff_profile_id", "year", "month",
+@Table(name = "cutoffs", uniqueConstraints = @UniqueConstraint(columnNames = { "frequency", "year", "month",
 	"cutoff_number" }))
 public class Cutoff {
 
@@ -29,9 +28,9 @@ public class Cutoff {
     @Column(columnDefinition = "varchar(16) not null default 'DRAFT'")
     private EnumCutoffStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "cutoff_profile_id", nullable = false)
-    private CutoffProfile cutoffProfile;
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(12) not null default 'MONTHLY'")
+    private EnumCutoffFrequency frequency;
 
     @Column(columnDefinition = "date not null")
     private LocalDate startDate;
@@ -49,20 +48,19 @@ public class Cutoff {
     private int cutoffNumber;
 
     public Cutoff() {
-	this(EnumCutoffStatus.DRAFT, null, LocalDate.now(), LocalDate.now().plusMonths(1), LocalDate.now().getYear(),
+	this(EnumCutoffStatus.DRAFT, LocalDate.now(), LocalDate.now().plusMonths(1), LocalDate.now().getYear(),
 		LocalDate.now().getMonthValue(), 1);
     }
 
-    public Cutoff(EnumCutoffStatus status, CutoffProfile cutoffProfile, LocalDate startDate, LocalDate endDate, int year,
-	    int month, int cutoffNumber) {
-	this(0L, status, cutoffProfile, startDate, endDate, year, month, cutoffNumber);
+    public Cutoff(EnumCutoffStatus status, LocalDate startDate, LocalDate endDate, int year, int month,
+	    int cutoffNumber) {
+	this(0L, status, startDate, endDate, year, month, cutoffNumber);
     }
 
-    public Cutoff(Long id, EnumCutoffStatus status, CutoffProfile cutoffProfile, LocalDate startDate, LocalDate endDate,
-	    int year, int month, int cutoffNumber) {
+    public Cutoff(Long id, EnumCutoffStatus status, LocalDate startDate, LocalDate endDate, int year, int month,
+	    int cutoffNumber) {
 	this.id = id;
 	this.status = status;
-	this.cutoffProfile = cutoffProfile;
 	this.startDate = startDate;
 	this.endDate = endDate;
 	this.year = year;
@@ -84,14 +82,6 @@ public class Cutoff {
 
     public void setStatus(EnumCutoffStatus status) {
 	this.status = status;
-    }
-
-    public CutoffProfile getCutoffProfile() {
-	return cutoffProfile;
-    }
-
-    public void setCutoffProfile(CutoffProfile cutoffProfile) {
-	this.cutoffProfile = cutoffProfile;
     }
 
     public LocalDate getStartDate() {
@@ -132,6 +122,14 @@ public class Cutoff {
 
     public void setCutoffNumber(int cutoffNumber) {
 	this.cutoffNumber = cutoffNumber;
+    }
+
+    public EnumCutoffFrequency getFrequency() {
+	return frequency;
+    }
+
+    public void setFrequency(EnumCutoffFrequency frequency) {
+	this.frequency = frequency;
     }
 
 }

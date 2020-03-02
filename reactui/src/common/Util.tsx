@@ -9,7 +9,7 @@ export default class Util {
     }
 
     public static isBlankOrNullString = (text: string) => {
-        if (text === undefined) {
+        if (text === undefined || text === null) {
             return true;
         }
         if (text.trim().length === 0) {

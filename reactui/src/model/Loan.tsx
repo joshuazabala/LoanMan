@@ -11,6 +11,12 @@ export default class Loan {
     public paymentStartDate: string;
     public remarks: string;
 
+    public clientId: string;
+    public client: string;
+
+    public loanTypeId: number;
+    public loanType: string;
+
     public constructor() {
         this.id = 0;
         this.status = EnumLoanStatus.ACTIVE;
@@ -20,6 +26,12 @@ export default class Loan {
         this.loanDate = "";
         this.paymentStartDate = "";
         this.remarks = "";
+
+        this.clientId = "";
+        this.client = "";
+
+        this.loanTypeId = 0;
+        this.loanType = "";
     }
 
 }

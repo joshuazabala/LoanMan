@@ -16,6 +16,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.codefaucet.LoanMan.common.StringHelper;
+
 @Entity
 @Table(name = "clients")
 public class Client {
@@ -80,7 +82,7 @@ public class Client {
     }
 
     public String getName() {
-	return getLastName() + ", " + getFirstName() + " " + getMiddleName();
+	return getLastName() + ", " + getFirstName() + (StringHelper.isNullOrEmpty(middleName) ? "" : " " + middleName);
     }
 
     public String getId() {

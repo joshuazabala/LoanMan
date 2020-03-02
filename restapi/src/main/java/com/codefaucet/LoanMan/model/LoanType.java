@@ -5,12 +5,16 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.codefaucet.LoanMan.common.EnumCutoffFrequency;
 
 @Entity
 @Table(name = "loan_types")
@@ -23,6 +27,10 @@ public class LoanType {
     @Column(columnDefinition = "tinyint(1) not null default 1")
     private boolean active;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 12, nullable = false)
+    private EnumCutoffFrequency paymentFrequency;
+
     @Column(length = 16, nullable = false, unique = true)
     private String code;
 
@@ -32,21 +40,23 @@ public class LoanType {
     @OneToMany(mappedBy = "loanType", fetch = FetchType.LAZY)
     private List<Loan> loans;
 
-    public LoanType(Long id, boolean deleted, String code, String name, String description) {
+    public LoanType(Long id, boolean active, EnumCutoffFrequency paymentFrequency, String code, String name,
+	    String description) {
 	this.id = id;
-	this.active = deleted;
+	this.active = active;
+	this.paymentFrequency = paymentFrequency;
 	this.code = code;
 	this.description = description;
-	
+
 	loans = new ArrayList<Loan>();
     }
 
-    public LoanType(String code, String name, String description) {
-	this(0L, true, code, name, description);
+    public LoanType(EnumCutoffFrequency paymentFrequency, String code, String name, String description) {
+	this(0L, true, paymentFrequency, code, name, description);
     }
 
     public LoanType() {
-	this("", "", "");
+	this(EnumCutoffFrequency.MONTHLY, "", "", "");
     }
 
     public Long getId() {
@@ -63,6 +73,14 @@ public class LoanType {
 
     public void setActive(boolean deleted) {
 	this.active = deleted;
+    }
+
+    public EnumCutoffFrequency getPaymentFrequency() {
+	return paymentFrequency;
+    }
+
+    public void setPaymentFrequency(EnumCutoffFrequency paymentFrequency) {
+	this.paymentFrequency = paymentFrequency;
     }
 
     public String getCode() {

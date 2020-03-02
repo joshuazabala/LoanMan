@@ -1,4 +1,5 @@
-import { EnumCutoffStatus } from "../common/EnumCutoffStatus";
+import { EnumCutoffFrequency } from '../common/EnumCutoffFrequency';
+import { EnumCutoffStatus } from '../common/EnumCutoffStatus';
 
 export default class Cutoff {
 
@@ -9,6 +10,7 @@ export default class Cutoff {
     public year: number;
     public month: number;
     public cutoffNumber: number;
+    public frequency: EnumCutoffFrequency;
 
     public constructor() {
         this.id = 0;
@@ -18,6 +20,7 @@ export default class Cutoff {
         this.year = 1992;
         this.month = 8;
         this.cutoffNumber = 2;
+        this.frequency = EnumCutoffFrequency.MONTHLY;
     }
 
 }
