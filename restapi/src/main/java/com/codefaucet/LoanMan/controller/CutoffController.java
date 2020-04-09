@@ -19,7 +19,7 @@ import com.codefaucet.LoanMan.common.PagedSearchRequest;
 import com.codefaucet.LoanMan.common.PagedSearchResponse;
 import com.codefaucet.LoanMan.common.RequestContainer;
 import com.codefaucet.LoanMan.common.ResponseContainer;
-import com.codefaucet.LoanMan.controller.dto.CutoffDTO;
+import com.codefaucet.LoanMan.dto.CutoffDTO;
 import com.codefaucet.LoanMan.model.Cutoff;
 import com.codefaucet.LoanMan.service.CutoffService;
 

@@ -19,29 +19,32 @@ public class Penalty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_id", nullable = false)
-    private Loan loan;
-
     @Column(columnDefinition = "date not null")
     private LocalDate date;
 
     @Column(columnDefinition = "decimal(18, 4) not null default 0")
     private double amount;
 
-    public Penalty(Long id, Loan loan, LocalDate date, double amount) {
+    @ManyToOne
+    @JoinColumn(name = "loan_id", nullable = false)
+    private Loan loan;
+
+    @ManyToOne
+    @JoinColumn(name = "cutoff_id", nullable = false)
+    private Cutoff cutoff;
+
+    public Penalty(Long id, LocalDate date, double amount) {
 	this.id = id;
-	this.loan = loan;
 	this.date = date;
 	this.amount = amount;
     }
 
-    public Penalty(Loan loan, LocalDate date, double amount) {
-	this(0L, loan, date, amount);
+    public Penalty(LocalDate date, double amount) {
+	this(0L, date, amount);
     }
 
     public Penalty() {
-	this(null, LocalDate.now(), 0D);
+	this(LocalDate.now(), 0D);
     }
 
     public Long getId() {
@@ -74,6 +77,14 @@ public class Penalty {
 
     public void setAmount(double amount) {
 	this.amount = amount;
+    }
+
+    public Cutoff getCutoff() {
+	return cutoff;
+    }
+
+    public void setCutoff(Cutoff cutoff) {
+	this.cutoff = cutoff;
     }
 
 }

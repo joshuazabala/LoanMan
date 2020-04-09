@@ -45,11 +45,18 @@ public class Loan {
     @Column(columnDefinition = "date not null")
     private LocalDate paymentStartDate;
 
+    @ManyToOne
+    @JoinColumn(name = "payment_start_cutoff_id", nullable = false)
+    private Cutoff paymentStartCutoff;
+
     @Column(length = 2048)
     private String remarks;
 
     @OneToMany(mappedBy = "loan")
     private List<Payment> payments;
+
+    @OneToMany(mappedBy = "loan")
+    private List<Penalty> penalties;
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
@@ -71,9 +78,11 @@ public class Loan {
 	this.remarks = remarks;
 
 	payments = new ArrayList<>();
+	penalties = new ArrayList<Penalty>();
     }
 
-    public Loan(double principal, double payable, double amortization, LocalDate loanDate, LocalDate paymentStartDate, String remarks) {
+    public Loan(double principal, double payable, double amortization, LocalDate loanDate, LocalDate paymentStartDate,
+	    String remarks) {
 	this(0L, EnumLoanStatus.ACTIVE, principal, payable, amortization, loanDate, paymentStartDate, remarks);
     }
 
@@ -167,6 +176,28 @@ public class Loan {
 
     public void setRemarks(String remarks) {
 	this.remarks = remarks;
+    }
+
+    public List<Penalty> getPenalties() {
+	return penalties;
+    }
+
+    public void setPenalties(List<Penalty> penalties) {
+	this.penalties = penalties;
+    }
+
+    public Cutoff getPaymentStartCutoff() {
+	return paymentStartCutoff;
+    }
+
+    public void setPaymentStartCutoff(Cutoff paymentStartCutoff) {
+	this.paymentStartCutoff = paymentStartCutoff;
+    }
+
+    @Override
+    public String toString() {
+	// TODO Auto-generated method stub
+	return super.toString();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.codefaucet.LoanMan.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -23,5 +24,8 @@ public interface ICutoffRepository extends JpaRepository<Cutoff, Long> {
 
     @Query("select c from Cutoff c where c.frequency = :frequency and c.year = :year and month = :month and cutoffNumber = :cutoffNumber")
     Cutoff findByCutoffNumber(EnumCutoffFrequency frequency, int year, int month, int cutoffNumber);
+
+    @Query("select c from Cutoff c where c.frequency = :frequency and c.startDate >= :date and c.endDate <= :date")
+    Cutoff findByDate(EnumCutoffFrequency frequency, LocalDate date);
 
 }

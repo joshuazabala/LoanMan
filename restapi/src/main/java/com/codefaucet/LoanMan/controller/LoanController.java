@@ -7,7 +7,7 @@ import com.codefaucet.LoanMan.common.RequestContainer;
 import com.codefaucet.LoanMan.common.ResponseContainer;
 import com.codefaucet.LoanMan.common.StringHelper;
 import com.codefaucet.LoanMan.common.Util;
-import com.codefaucet.LoanMan.controller.dto.LoanDTO;
+import com.codefaucet.LoanMan.dto.LoanDTO;
 import com.codefaucet.LoanMan.model.Client;
 import com.codefaucet.LoanMan.model.Loan;
 import com.codefaucet.LoanMan.model.LoanType;

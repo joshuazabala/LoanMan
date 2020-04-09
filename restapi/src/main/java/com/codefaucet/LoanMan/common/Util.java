@@ -1,7 +1,7 @@
 package com.codefaucet.LoanMan.common;
 
 public class Util {
-
+    
     public static long getTotalPage(long totalCount, long pageSize) {
 	long pageCount = 0;
 	

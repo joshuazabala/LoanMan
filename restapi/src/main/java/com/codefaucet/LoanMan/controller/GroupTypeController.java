@@ -18,10 +18,10 @@ import com.codefaucet.LoanMan.common.RequestContainer;
 import com.codefaucet.LoanMan.common.ResponseContainer;
 import com.codefaucet.LoanMan.common.StringHelper;
 import com.codefaucet.LoanMan.common.StringHelper.CharSet;
+import com.codefaucet.LoanMan.dto.GroupTypeDTO;
 import com.codefaucet.LoanMan.common.EnumResponseStatus;
 import com.codefaucet.LoanMan.common.LoggingHelper;
 import com.codefaucet.LoanMan.common.Util;
-import com.codefaucet.LoanMan.controller.dto.GroupTypeDTO;
 import com.codefaucet.LoanMan.model.GroupType;
 import com.codefaucet.LoanMan.service.GroupTypeService;
 

@@ -32,6 +32,10 @@ public class Payment {
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 
+    @ManyToOne
+    @JoinColumn(name = "cutoff_id", nullable = false)
+    private Cutoff cutoff;
+
     public Payment(Long id, boolean active, LocalDate date, double amount) {
 	this.id = id;
 	this.active = active;
@@ -85,6 +89,14 @@ public class Payment {
 
     public void setLoan(Loan loan) {
 	this.loan = loan;
+    }
+
+    public Cutoff getCutoff() {
+	return cutoff;
+    }
+
+    public void setCutoff(Cutoff cutoff) {
+	this.cutoff = cutoff;
     }
 
 }
