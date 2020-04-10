@@ -28,6 +28,7 @@ import {
     TableHeader,
     TableHeaderCell,
     TableRow,
+    Container,
 } from 'semantic-ui-react';
 
 import { EnumLoanStatus } from '../../common/EnumLoanStatus';
@@ -83,117 +84,119 @@ export default class LoanPage extends React.Component<any, IState> {
 
     public render() {
         return (
-            <Grid container={true}>
-                <GridRow>
-                    <GridColumn>
-                        <Header as="h2">Loans</Header>
-                    </GridColumn>
-                </GridRow>
-                <GridRow columns={3} style={{ paddingBottom: 2, paddingTop: 2 }}>
-                    <GridColumn width={5}>
-                        <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
-                        {this.state.selectedId !== 0 && <Button icon="edit" content="Edit" disabled={this.state.loading} onClick={this.onEdit} />}
-                        {this.state.selectedId !== 0 && <Button icon="trash" content="Delete" disabled={this.state.loading} onClick={this.onDelete} />}
-                    </GridColumn>
-                    <GridColumn width={6}>
-                        <Dropdown 
-                            fluid={true}
-                            options={this.state.loanTypes}
-                            value={this.state.selectedLoanTypeId}
-                            selection={true}
-                            disabled={this.state.loading}
-                            onChange={this.onSelectedLoanTypeChanged}
-                            search={true}
-                            onSearchChange={this.onLoanTypeSearchChanged}
-                            onClick={this.onLoanTypeSearchClick}
-                        />
-                    </GridColumn>
-                    <GridColumn textAlign="right" width={5}>
-                        <Form onSubmit={this.onFormSubmit}>
-                            <FormInput
+            <Container fluid={true}>
+                <Grid>
+                    <GridRow style={{ paddingBottom: 2 }}>
+                        <GridColumn>
+                            <Header as="h2">Loans</Header>
+                        </GridColumn>
+                    </GridRow>
+                    <GridRow columns={3} style={{ paddingBottom: 2, paddingTop: 2 }}>
+                        <GridColumn width={5}>
+                            <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
+                            {this.state.selectedId !== 0 && <Button icon="edit" content="Edit" disabled={this.state.loading} onClick={this.onEdit} />}
+                            {this.state.selectedId !== 0 && <Button icon="trash" content="Delete" disabled={this.state.loading} onClick={this.onDelete} />}
+                        </GridColumn>
+                        <GridColumn width={6}>
+                            <Dropdown
+                                fluid={true}
+                                options={this.state.loanTypes}
+                                value={this.state.selectedLoanTypeId}
+                                selection={true}
                                 disabled={this.state.loading}
-                                placeholder="Search"
-                                action={{ icon: "search", content: "Search" }}
-                                value={this.state.queryString}
-                                onChange={this.onQueryStringChanged}
+                                onChange={this.onSelectedLoanTypeChanged}
+                                search={true}
+                                onSearchChange={this.onLoanTypeSearchChanged}
+                                onClick={this.onLoanTypeSearchClick}
                             />
-                        </Form>
-                    </GridColumn>
-                </GridRow>
-                <GridRow style={{ paddingBottom: 40, paddingTop: 2 }}>
-                    <GridColumn>
-                        <Table celled={true} striped={true} selectable={true}>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHeaderCell width={2}>Loan Date</TableHeaderCell>
-                                    <TableHeaderCell width={5}>Client</TableHeaderCell>
-                                    <TableHeaderCell width={4}>Loan Type</TableHeaderCell>
-                                    <TableHeaderCell width={5}>Remarks</TableHeaderCell>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {
-                                    this.state.contents.map((item, index) => {
-                                        return (
-                                            <TableRow key={index} data-id={item.id} onClick={this.onRowClick} active={this.state.selectedId === item.id}>
-                                                <TableCell>{item.loanDate}</TableCell>
-                                                <TableCell>{item.client}</TableCell>
-                                                <TableCell>{item.loanType}</TableCell>
-                                                <TableCell>{item.remarks}</TableCell>
-                                            </TableRow>
-                                        )
-                                    })
-                                }
-                            </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableHeaderCell colSpan={4} textAlign="right">
-                                        <Loader active={this.state.loading} />
-                                        <Pagination 
-                                            disabled={this.state.loading}
-                                            onPageChange={this.onPageChange}
-                                            defaultActivePage={this.state.pageStat.currentPage} 
-                                            totalPages={this.state.pageStat.totalPageCount} 
-                                            ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
-                                            firstItem={{ content: <Icon name='angle double left' />, icon: true }}
-                                            lastItem={{ content: <Icon name='angle double right' />, icon: true }}
-                                            prevItem={{ content: <Icon name='angle left' />, icon: true }}
-                                            nextItem={{ content: <Icon name='angle right' />, icon: true }}
-                                        />
-                                    </TableHeaderCell>
-                                </TableRow>
-                            </TableFooter>
-                        </Table>
-                    </GridColumn>
-                </GridRow>
-                
-                <LoanForm 
-                    visible={this.state.formVisible}
-                    ref={this.formRef}
-                    onCancelled={this.onFormCancelled}
-                    onSaved={this.onFormSaved}
-                />
+                        </GridColumn>
+                        <GridColumn textAlign="right" width={5}>
+                            <Form onSubmit={this.onFormSubmit}>
+                                <FormInput
+                                    disabled={this.state.loading}
+                                    placeholder="Search"
+                                    action={{ icon: "search", content: "Search" }}
+                                    value={this.state.queryString}
+                                    onChange={this.onQueryStringChanged}
+                                />
+                            </Form>
+                        </GridColumn>
+                    </GridRow>
+                    <GridRow style={{ paddingBottom: 40, paddingTop: 2 }}>
+                        <GridColumn>
+                            <Table celled={true} striped={true} selectable={true}>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHeaderCell width={2}>Loan Date</TableHeaderCell>
+                                        <TableHeaderCell width={5}>Client</TableHeaderCell>
+                                        <TableHeaderCell width={4}>Loan Type</TableHeaderCell>
+                                        <TableHeaderCell width={5}>Remarks</TableHeaderCell>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {
+                                        this.state.contents.map((item, index) => {
+                                            return (
+                                                <TableRow key={index} data-id={item.id} onClick={this.onRowClick} active={this.state.selectedId === item.id}>
+                                                    <TableCell>{item.loanDate}</TableCell>
+                                                    <TableCell>{item.client}</TableCell>
+                                                    <TableCell>{item.loanType}</TableCell>
+                                                    <TableCell>{item.remarks}</TableCell>
+                                                </TableRow>
+                                            )
+                                        })
+                                    }
+                                </TableBody>
+                                <TableFooter>
+                                    <TableRow>
+                                        <TableHeaderCell colSpan={4} textAlign="right">
+                                            <Loader active={this.state.loading} />
+                                            <Pagination
+                                                disabled={this.state.loading}
+                                                onPageChange={this.onPageChange}
+                                                defaultActivePage={this.state.pageStat.currentPage}
+                                                totalPages={this.state.pageStat.totalPageCount}
+                                                ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
+                                                firstItem={{ content: <Icon name='angle double left' />, icon: true }}
+                                                lastItem={{ content: <Icon name='angle double right' />, icon: true }}
+                                                prevItem={{ content: <Icon name='angle left' />, icon: true }}
+                                                nextItem={{ content: <Icon name='angle right' />, icon: true }}
+                                            />
+                                        </TableHeaderCell>
+                                    </TableRow>
+                                </TableFooter>
+                            </Table>
+                        </GridColumn>
+                    </GridRow>
 
-                <Modal open={this.state.deleteModalVisible} size="small">
-                    <ModalHeader>Confirm Action</ModalHeader>
-                    <ModalContent>Delete selected loan?</ModalContent>
-                    <ModalActions>
-                        <Button 
-                            negative={true}
-                            content="Delete"
-                            onClick={this.delete}
-                            disabled={this.state.loading}
-                        />
-                        <Button 
-                            content="Cancel"
-                            onClick={this.onCancelDelete}
-                            disabled={this.state.loading}
-                        />
-                    </ModalActions>
-                    <Loader active={this.state.loading} />
-                </Modal>
+                    <LoanForm
+                        visible={this.state.formVisible}
+                        ref={this.formRef}
+                        onCancelled={this.onFormCancelled}
+                        onSaved={this.onFormSaved}
+                    />
 
-            </Grid>
+                    <Modal open={this.state.deleteModalVisible} size="small">
+                        <ModalHeader>Confirm Action</ModalHeader>
+                        <ModalContent>Delete selected loan?</ModalContent>
+                        <ModalActions>
+                            <Button
+                                negative={true}
+                                content="Delete"
+                                onClick={this.delete}
+                                disabled={this.state.loading}
+                            />
+                            <Button
+                                content="Cancel"
+                                onClick={this.onCancelDelete}
+                                disabled={this.state.loading}
+                            />
+                        </ModalActions>
+                        <Loader active={this.state.loading} />
+                    </Modal>
+
+                </Grid>
+            </Container>
         );
     }
 
@@ -236,7 +239,7 @@ export default class LoanPage extends React.Component<any, IState> {
         requestParam.pageNumber = this.state.pageStat.currentPage;
         requestParam.pageSize = this.state.pageStat.pageSize;
         requestParam.queryString = this.state.queryString;
-        requestParam.otherData = { 
+        requestParam.otherData = {
             loanTypeId: this.state.selectedLoanTypeId,
             loanStatuses: [EnumLoanStatus.ACTIVE].join(",")
         };
@@ -247,24 +250,24 @@ export default class LoanPage extends React.Component<any, IState> {
             },
             () => {
                 fetchPost<PagedSearchRequest, PagedSearchResponse<Loan>>("/loan/search", requestParam)
-                .then(result => {
-                    if (result.status === EnumResponseStatus.SUCCESSFUL) {
-                        const pageStat = this.state.pageStat;
-                        pageStat.totalPageCount = result.totalPageCount;
-                        this.setState({
-                            contents: result.content,
-                            loading: false,
-                            pageStat
-                        });
-                    } else {
-                        this.setState(
-                            { loading: false },
-                            () => {
-                                alert("Error: " + result.message);
-                            }
-                        );
-                    }
-                });
+                    .then(result => {
+                        if (result.status === EnumResponseStatus.SUCCESSFUL) {
+                            const pageStat = this.state.pageStat;
+                            pageStat.totalPageCount = result.totalPageCount;
+                            this.setState({
+                                contents: result.content,
+                                loading: false,
+                                pageStat
+                            });
+                        } else {
+                            this.setState(
+                                { loading: false },
+                                () => {
+                                    alert("Error: " + result.message);
+                                }
+                            );
+                        }
+                    });
             }
         );
     }
@@ -272,32 +275,32 @@ export default class LoanPage extends React.Component<any, IState> {
     private showForm = (id: number) => {
         const requestParam = { id };
 
-        fetchPost<{id: number}, Loan>("/loan/findById", requestParam)
-        .then(item => {
-            this.setState(
-                { formVisible: true },
-                () => {
-                    item.clientId = Util.isBlankOrNullString(item.clientId) ? "0" : item.clientId;
-                    const loanTypes = [{
-                        key: item.loanTypeId,
-                        value: item.loanTypeId,
-                        text: item.loanTypeId === 0 ? "Select Loan Type" : item.loanType
-                    }];
-                    const clients = [{
-                        key: item.clientId,
-                        value: item.clientId,
-                        text: item.clientId === "0" ? "Select Client" : item.client
-                    }];
-                    this.formRef.current!.setState({ 
-                        content: item, 
-                        errorMessage: "", 
-                        errorMap: new Map<string, string>(),
-                        loanTypes, 
-                        clients
-                    });
-                }
-            );
-        });
+        fetchPost<{ id: number }, Loan>("/loan/findById", requestParam)
+            .then(item => {
+                this.setState(
+                    { formVisible: true },
+                    () => {
+                        item.clientId = Util.isBlankOrNullString(item.clientId) ? "0" : item.clientId;
+                        const loanTypes = [{
+                            key: item.loanTypeId,
+                            value: item.loanTypeId,
+                            text: item.loanTypeId === 0 ? "Select Loan Type" : item.loanType
+                        }];
+                        const clients = [{
+                            key: item.clientId,
+                            value: item.clientId,
+                            text: item.clientId === "0" ? "Select Client" : item.client
+                        }];
+                        this.formRef.current!.setState({
+                            content: item,
+                            errorMessage: "",
+                            errorMap: new Map<string, string>(),
+                            loanTypes,
+                            clients
+                        });
+                    }
+                );
+            });
     }
 
     private onFormCancelled = () => {
@@ -313,33 +316,33 @@ export default class LoanPage extends React.Component<any, IState> {
                 requestParam.content = content;
 
                 fetchPost<RequestContainer<Loan>, ResponseContainer<Loan>>("/loan/save", requestParam)
-                .then(response => {
-                    this.formRef.current!.setState(
-                        { loading: false },
-                        () => {
-                            if (response.status === EnumResponseStatus.SUCCESSFUL) {
-                                const contents = this.state.contents;
-                                const index = contents.findIndex(item => item.id === response.content.id);
-                                if (index === -1) {
-                                    contents.unshift(response.content);
+                    .then(response => {
+                        this.formRef.current!.setState(
+                            { loading: false },
+                            () => {
+                                if (response.status === EnumResponseStatus.SUCCESSFUL) {
+                                    const contents = this.state.contents;
+                                    const index = contents.findIndex(item => item.id === response.content.id);
+                                    if (index === -1) {
+                                        contents.unshift(response.content);
+                                    } else {
+                                        contents[index] = response.content;
+                                    }
+
+                                    this.setState({
+                                        formVisible: false,
+                                        contents
+                                    });
                                 } else {
-                                    contents[index] = response.content;
+                                    this.formRef.current!.setState({
+                                        loading: false,
+                                        errorMap: Util.objectToMap(response.errorMap),
+                                        errorMessage: response.message
+                                    });
                                 }
-    
-                                this.setState({
-                                    formVisible: false,
-                                    contents
-                                });
-                            } else {
-                                this.formRef.current!.setState({
-                                    loading: false,
-                                    errorMap: Util.objectToMap(response.errorMap),
-                                    errorMessage: response.message
-                                });
                             }
-                        }
-                    );
-                });
+                        );
+                    });
             }
         );
     }
@@ -372,20 +375,20 @@ export default class LoanPage extends React.Component<any, IState> {
             { loading: true },
             () => {
                 fetchPost<RequestContainer<number>, ResponseContainer<boolean>>("/loan/delete", requestParam)
-                .then(response => {
-                    if (response.status === EnumResponseStatus.SUCCESSFUL) {
-                        let contents = this.state.contents;
-                        contents = contents.filter(item => item.id !== this.state.selectedId);
-                        this.setState({
-                            contents: contents,
-                            selectedId: 0,
-                            deleteModalVisible: false,
-                            loading: false
-                        });
-                    } else {
-                        alert("Error: " + response.message);
-                    }
-                });
+                    .then(response => {
+                        if (response.status === EnumResponseStatus.SUCCESSFUL) {
+                            let contents = this.state.contents;
+                            contents = contents.filter(item => item.id !== this.state.selectedId);
+                            this.setState({
+                                contents: contents,
+                                selectedId: 0,
+                                deleteModalVisible: false,
+                                loading: false
+                            });
+                        } else {
+                            alert("Error: " + response.message);
+                        }
+                    });
             }
         );
     }
@@ -416,22 +419,22 @@ export default class LoanPage extends React.Component<any, IState> {
             requestParam.queryString = queryString;
 
             fetchPost<PagedSearchRequest, PagedSearchResponse<LoanType>>("/loantype/search", requestParam)
-            .then(result => {
-                const loanTypes = new Array<DropdownItemProps>();
-                loanTypes.push({
-                    key: 0,
-                    value: 0,
-                    text: "All Types"
-                });
-                result.content.forEach(item => {
+                .then(result => {
+                    const loanTypes = new Array<DropdownItemProps>();
                     loanTypes.push({
-                        key: item.id,
-                        value: item.id,
-                        text: item.code + " - " + item.description
+                        key: 0,
+                        value: 0,
+                        text: "All Types"
                     });
+                    result.content.forEach(item => {
+                        loanTypes.push({
+                            key: item.id,
+                            value: item.id,
+                            text: item.code + " - " + item.description
+                        });
+                    });
+                    this.setState({ loanTypes });
                 });
-                this.setState({ loanTypes });
-            });
         }, 200);
     }
 
