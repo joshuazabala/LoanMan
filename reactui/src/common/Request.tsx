@@ -2,7 +2,7 @@ export async function fetchPostFormData<OUTPUT_TYPE>(url: string, data: FormData
     const headers = {
         "Accept": "application/json"
     }
-    const x = window.apiHost + url;
+    const x = process.env.REACT_APP_API_URL + url;
     const response = await fetch(x, {
         body: data,
         headers,
@@ -16,7 +16,7 @@ export async function fetchPost<INPUT_TYPE, OUTPUT_TYPE>(url: string, data: INPU
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    const x = window.apiHost + url;
+    const x = process.env.REACT_APP_API_URL + url;
     const response = await fetch(x, {
         body: JSON.stringify(data),
         headers,
@@ -29,7 +29,7 @@ export async function fetchPostWithFile<OUTPUT_TYPE>(url: string, data: FormData
     const headers = {
         "Accept": "application/json"
     }
-    const response = await fetch(window.apiHost + url, {
+    const response = await fetch(process.env.REACT_APP_API_URL + url, {
         body: data,
         headers,
         method: "POST"
@@ -41,7 +41,7 @@ export async function downloadPost<INPUT_TYPE>(url: string, data: INPUT_TYPE) {
     const headers = {
         "Accept": "application/json"
     }
-    const response = await window.fetch(window.apiHost + url, {
+    const response = await window.fetch(process.env.REACT_APP_API_URL + url, {
         body: JSON.stringify(data),
         credentials: "include",
         headers,

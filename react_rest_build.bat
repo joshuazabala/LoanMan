@@ -24,7 +24,8 @@ echo.
 echo.
 
 echo building rest api war file
-call mvn -Dmaven.repo.local=C:\Users\19019-JPZ\.m2\repository clean install -f restapi -Dmaven.test.skip=true
+echo mvn -Dmaven.repo.local=C:\Users\19019-JPZ\.m2\repository clean install -f restapi -Dmaven.test.skip=true 
+call mvn -Dmaven.repo.local=C:\Users\19019-JPZ\.m2\repository clean install -f restapi -Dmaven.test.skip=true 
 echo.
 echo.
 

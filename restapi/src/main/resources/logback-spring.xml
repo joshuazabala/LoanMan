@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
 
-    <property name="HOME_LOG" value="D:/logs/loanman.log"/>
+    <springProfile name="dev">
+    	<property name="LOG_DIRECTORY" value="D:/logs"/>
+    </springProfile>
+    
+    <springProfile name="prod">
+    	<property name="LOG_DIRECTORY" value="/home/pi/logs"/>
+    </springProfile>
     
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 	  	<encoder>
@@ -10,10 +16,10 @@
 	</appender>
 
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${HOME_LOG}</file>
+        <file>${LOG_DIRECTORY}/loanman.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOG_DIRECTORY}/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>60MB</maxFileSize>
             <totalSizeCap>20GB</totalSizeCap>
             <maxHistory>60</maxHistory>
