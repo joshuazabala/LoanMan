@@ -1,27 +1,25 @@
 package com.codefaucet.LoanMan.controller;
 
 import java.util.List;
-import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.codefaucet.LoanMan.common.LoggingHelper;
 import com.codefaucet.LoanMan.common.PagedSearchRequest;
 import com.codefaucet.LoanMan.common.PagedSearchResponse;
-import com.codefaucet.LoanMan.common.RequestContainer;
 import com.codefaucet.LoanMan.common.ResponseContainer;
 import com.codefaucet.LoanMan.common.StringHelper;
 import com.codefaucet.LoanMan.common.StringHelper.CharSet;
-import com.codefaucet.LoanMan.dto.GroupTypeDTO;
-import com.codefaucet.LoanMan.common.EnumResponseStatus;
-import com.codefaucet.LoanMan.common.LoggingHelper;
 import com.codefaucet.LoanMan.common.Util;
+import com.codefaucet.LoanMan.dto.GroupTypeDTO;
 import com.codefaucet.LoanMan.model.GroupType;
 import com.codefaucet.LoanMan.service.GroupTypeService;
 
@@ -32,19 +30,30 @@ public class GroupTypeController {
     @Autowired
     private GroupTypeService groupTypeService;
     
-    private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(GroupTypeController.class);
     
     @Autowired
     private LoggingHelper loggingHelper;
     
-    @GetMapping("/testInsertData")
-    public void testInsertData() {
-	for (int a = 0; a < 129; a++) {
-	    GroupType groupType = new GroupType();
-	    groupType.setCode("CODE" + a);
-	    groupType.setDescription(groupType.getCode() + " description");
-	    groupTypeService.save(groupType);
-	}
+    @GetMapping("/findById/{groupTypeId}")
+    public GroupTypeDTO findById(@PathVariable long groupTypeId) {
+	logger.debug("findById | groupTypeId: " + groupTypeId);
+	
+	GroupType groupType = groupTypeId == 0 ? new GroupType() : groupTypeService.findById(groupTypeId);
+	GroupTypeDTO dto = new GroupTypeDTO(groupType.getId(), groupType.isActive(), groupType.getName(), groupType.getDescription());
+	return dto;
+    }
+    
+    @GetMapping("/delete/{groupTypeId}")
+    public void delete(@PathVariable long groupTypeId) {
+	logger.debug("delete | groupTypeId: " + groupTypeId);
+	groupTypeService.delete(groupTypeId);
+    }
+    
+    @GetMapping("/restore/{groupTypeId}")
+    public void restore(@PathVariable long groupTypeId) {
+	logger.debug("restore | groupTypeId: " + groupTypeId);
+	groupTypeService.restore(groupTypeId);
     }
     
     @PostMapping("/search")
@@ -52,107 +61,85 @@ public class GroupTypeController {
 	logger.debug("search | param: " + loggingHelper.asString(param));
 	
 	PagedSearchResponse<GroupTypeDTO> response = new PagedSearchResponse<GroupTypeDTO>();
-	
-	try {
-	    List<GroupType> groupTypes = groupTypeService.search(param);
-	    Long totalCount = groupTypeService.countSearchResult(param);
+	List<GroupType> groupTypes = groupTypeService.search(param);
+	Long totalCount = groupTypeService.countSearchResult(param);
 	    
-	    groupTypes.forEach(item -> {
-		GroupTypeDTO dto = new GroupTypeDTO(item.getId(), item.isActive(), item.getCode(), item.getDescription());
-		response.getContent().add(dto);
-	    });
-	    response.setTotalPageCount(Util.getTotalPage(totalCount, param.getPageSize()));
-	} catch (Exception ex) {
-	    response.setStatus(EnumResponseStatus.FAILED);
-	    response.setMessage(ex.getMessage());
-	    logger.error("search | Error: " + ex.getMessage(), ex);
-	}
+	groupTypes.forEach(item -> {
+	    GroupTypeDTO dto = new GroupTypeDTO(item.getId(), item.isActive(), item.getName(), item.getDescription());
+	    response.getContent().add(dto);
+	});
+	response.setTotalPageCount(Util.getTotalPage(totalCount, param.getPageSize()));
+	response.setColumnSorting(param.getColumnSorting());
 	
 	return response;
     }
     
-    @PostMapping("/findById")
-    public GroupTypeDTO findById(@RequestBody Map<String, Long> param) {
-	logger.debug("findById | param: " + loggingHelper.asString(param));
-	
-	long id = param.get("id");
-	GroupType groupType = id == 0 ? new GroupType() : groupTypeService.findById(id);
-	GroupTypeDTO dto = new GroupTypeDTO(groupType.getId(), groupType.isActive(), groupType.getCode(), groupType.getDescription());
-	return dto;
-    }
-    
-    @PostMapping("/save")
-    public ResponseContainer<GroupTypeDTO> save(@RequestBody RequestContainer<GroupTypeDTO> param) {
-	logger.debug("save | param: " + loggingHelper.asString(param));
+    @PostMapping("/create")
+    public ResponseContainer<GroupTypeDTO> create(@RequestBody GroupTypeDTO dto) {
+	logger.debug("save | dto: " + loggingHelper.asString(dto));
 	
 	ResponseContainer<GroupTypeDTO> response = new ResponseContainer<GroupTypeDTO>();
-	try {
-	    GroupTypeDTO dto = param.getContent();
-	    
-	    // basic validation
-	    if (StringHelper.isNullOrEmpty(dto.getCode())) {
-		response.getErrorMap().put("code", "Code can't be empty.");
-	    }
-	    if (!StringHelper.isInCharSet(CharSet.ALPHANUMERIC, dto.getCode().trim())) {
-		String codeError = response.getErrorMap().getOrDefault("code", "");
-		codeError += (codeError.isEmpty() ? "" : "<br />") + "Only alphanumeric characters are allowed.";
-		response.getErrorMap().put("code", codeError);
-	    }
-	    if (StringHelper.isNullOrEmpty(dto.getDescription())) {
-		response.getErrorMap().put("description", "Description can't be empty.");
-	    }
-	    if (!response.getErrorMap().isEmpty()) {
-		return response.failed();
-	    }
-	    
-	    dto.setCode(dto.getCode().trim().toUpperCase());
-	    dto.setDescription(dto.getDescription().trim());
-	    
-	    // check if code is used by other group type
-	    GroupType groupType = groupTypeService.findByCode(param.getContent().getCode());
-	    if (groupType != null && groupType.getId() != dto.getId()) {
-		response.getErrorMap().put("code", "Code '" + dto.getCode() + "' is not available.");
-		return response.failed();
-	    }
-	    
-	    // if group type was found by above query and code validation has no problem, then we already have the correct group type
-	    if (groupType == null) {
-		groupType = param.getContent().getId() == 0 ? new GroupType() : groupTypeService.findById(param.getContent().getId());
-	    }
-	    
-	    // map values
-	    groupType.setCode(dto.getCode());
-	    groupType.setDescription(dto.getDescription());
-	    groupType = groupTypeService.save(groupType);
-	    
-	    dto.setId(groupType.getId());
-	    return response.successful(dto);
-	} catch (Exception ex) {
-	    logger.error("save | Error: " + ex.getMessage(), ex);
-	    
-	    return response.failed(ex.getMessage());
+	
+	if (StringHelper.isNullOrEmpty(dto.getName())) {
+		response.getErrorMap().put("name", "Name can't be empty.");
 	}
+	if (!StringHelper.isInCharSet(CharSet.ALPHANUMERIC, dto.getName().trim())) {
+	    String nameError = response.getErrorMap().getOrDefault("name", "");
+	    nameError += (nameError.isEmpty() ? "" : "<br />") + "Only alphanumeric characters are allowed.";
+	    response.getErrorMap().put("name", nameError);
+	}
+	if (!response.getErrorMap().isEmpty()) {
+	    return response.failed();
+	}
+	dto.setName(dto.getName().trim());
+	dto.setDescription(dto.getDescription() == null ? "" : dto.getDescription().trim());
+	
+	GroupType duplicate = groupTypeService.findByName(dto.getName().trim());
+	if (duplicate != null) {
+	    response.getErrorMap().put("name", "Name '" + dto.getName() + "' is already in use.");
+	    return response.failed();
+	}
+	
+	GroupType groupType = new GroupType(dto.getName(), dto.getDescription());
+	groupType = groupTypeService.create(groupType);
+	
+	dto = new GroupTypeDTO(groupType.getId(), groupType.isActive(), groupType.getName(), groupType.getDescription());
+	return response.successful(dto);
     }
     
-    @PostMapping("delete")
-    public ResponseContainer<Boolean> delete(@RequestBody RequestContainer<Long> param) {
-	logger.debug("delete | param: " + loggingHelper.asString(param));
+    @PostMapping("/edit")
+    public ResponseContainer<GroupTypeDTO> edit(@RequestBody GroupTypeDTO dto) {
+	logger.debug("edit | dto: " + loggingHelper.asString(dto));
 	
-	ResponseContainer<Boolean> response = new ResponseContainer<Boolean>();
-	long id = param.getContent();
-	try {
-	    long groupCount = groupTypeService.getGroupCount(id);
-	    if (groupCount > 0) {
-		return response.failed("There are groups with this type.");
-	    }
-	    groupTypeService.deleteById(id);
-
-	    return response.successful(true);
-	} catch (Exception ex) {
-	    logger.error("delete | Error: " + ex.getMessage(), ex);
-	    
-	    return response.failed(ex.getMessage());
+	ResponseContainer<GroupTypeDTO> response = new ResponseContainer<GroupTypeDTO>();
+	
+	if (StringHelper.isNullOrEmpty(dto.getName())) {
+		response.getErrorMap().put("name", "Name can't be empty.");
 	}
+	if (!StringHelper.isInCharSet(CharSet.ALPHANUMERIC, dto.getName().trim())) {
+	    String nameError = response.getErrorMap().getOrDefault("name", "");
+	    nameError += (nameError.isEmpty() ? "" : "<br />") + "Only alphanumeric characters are allowed.";
+	    response.getErrorMap().put("name", nameError);
+	}
+	if (!response.getErrorMap().isEmpty()) {
+	    return response.failed();
+	}
+	dto.setName(dto.getName().trim());
+	dto.setDescription(dto.getDescription() == null ? "" : dto.getDescription().trim());
+	
+	GroupType duplicate = groupTypeService.findByName(dto.getName().trim());
+	if (duplicate != null && duplicate.getId() != dto.getId()) {
+	    response.getErrorMap().put("name", "Name '" + dto.getName() + "' is already in use.");
+	    return response.failed();
+	}
+	
+	GroupType groupType = duplicate != null ? duplicate : groupTypeService.findById(dto.getId());
+	groupType.setName(dto.getName());
+	groupType.setDescription(dto.getDescription());
+	groupType = groupTypeService.edit(groupType);
+	
+	dto = new GroupTypeDTO(groupType.getId(), groupType.isActive(), groupType.getName(), groupType.getDescription());
+	return response.successful(dto);
     }
     
 }

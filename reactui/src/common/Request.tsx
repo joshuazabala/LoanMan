@@ -11,6 +11,31 @@ export async function fetchPostFormData<OUTPUT_TYPE>(url: string, data: FormData
     return response.json();
 }
 
+export async function fetchGetNoReturn(url: string) {
+    const headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    };
+    const x = process.env.REACT_APP_API_URL + url;
+    await fetch(x, {
+        headers,
+        method: "GET"
+    });
+}
+
+export async function fetchGet<OUTPUT_TYPE>(url: string): Promise<OUTPUT_TYPE> {
+    const headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    };
+    const x = process.env.REACT_APP_API_URL + url;
+    const response = await fetch(x, {
+        headers,
+        method: "GET"
+    });
+    return response.json();
+}
+
 export async function fetchPost<INPUT_TYPE, OUTPUT_TYPE>(url: string, data: INPUT_TYPE): Promise<OUTPUT_TYPE> {
     const headers = {
         "Accept": "application/json",

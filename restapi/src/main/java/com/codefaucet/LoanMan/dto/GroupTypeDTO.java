@@ -4,13 +4,13 @@ public class GroupTypeDTO {
 
     private long id;
     private boolean active;
-    private String code;
+    private String name;
     private String description;
 
-    public GroupTypeDTO(long id, boolean active, String code, String description) {
+    public GroupTypeDTO(long id, boolean active, String name, String description) {
 	this.id = id;
 	this.active = active;
-	this.code = code;
+	this.name = name;
 	this.description = description;
     }
 
@@ -34,12 +34,12 @@ public class GroupTypeDTO {
 	this.active = active;
     }
 
-    public String getCode() {
-	return code;
+    public String getName() {
+	return name;
     }
 
-    public void setCode(String code) {
-	this.code = code;
+    public void setName(String name) {
+	this.name = name;
     }
 
     public String getDescription() {

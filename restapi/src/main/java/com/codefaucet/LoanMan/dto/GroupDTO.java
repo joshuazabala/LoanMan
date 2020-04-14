@@ -4,16 +4,16 @@ public class GroupDTO {
 
     private long id;
     private boolean active;
-    private String code;
+    private String name;
     private String description;
 
     private long groupTypeId;
     private String groupType;
 
-    public GroupDTO(long id, boolean active, String code, String description, long groupTypeId, String groupType) {
+    public GroupDTO(long id, boolean active, String name, String description, long groupTypeId, String groupType) {
 	this.id = id;
 	this.active = active;
-	this.code = code;
+	this.name = name;
 	this.description = description;
 	this.groupTypeId = groupTypeId;
 	this.groupType = groupType;
@@ -39,12 +39,12 @@ public class GroupDTO {
 	this.active = active;
     }
 
-    public String getCode() {
-	return code;
+    public String getName() {
+	return name;
     }
 
-    public void setCode(String code) {
-	this.code = code;
+    public void setName(String name) {
+	this.name = name;
     }
 
     public String getDescription() {

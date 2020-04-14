@@ -113,6 +113,8 @@ export default class CutoffForm extends React.Component<IFormProps, IFormState<C
                                 value={this.state.content.startDate}
                                 disabled={this.state.loading}
                                 error={this.state.errorMap.get("startDate")}
+                                fieldname="startDate"
+                                onChange={this.onDateChange}
                             />
                             <FormInput 
                                 label="End Date"
@@ -120,6 +122,8 @@ export default class CutoffForm extends React.Component<IFormProps, IFormState<C
                                 value={this.state.content.endDate}
                                 disabled={this.state.loading}
                                 error={this.state.errorMap.get("endDate")}
+                                fieldname="endDate"
+                                onChange={this.onDateChange}
                             />
                         </FormGroup>
                         {
@@ -210,7 +214,20 @@ export default class CutoffForm extends React.Component<IFormProps, IFormState<C
 
     private onYearChange = (event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) => {
         const content = this.state.content;
-        content.year = +data.value;
+        let year = +data.value;
+        if (!isNaN(year)) {
+            content.year = year;
+        }
+        this.setState({ content });
+    }
+
+    private onDateChange = (event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) => {
+        const content = this.state.content;
+        if (data.fieldname === "startDate") {
+            content.startDate = data.value;
+        } else {
+            content.endDate = data.value;
+        }
         this.setState({ content });
     }
 

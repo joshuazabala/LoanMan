@@ -17,7 +17,7 @@ public interface IGroupTypeRepository extends JpaRepository<GroupType, Long> {
 	    "select gt from GroupType gt "
 	    + "where "
 	    + "( "
-	    + "gt.code like '%' || :queryString || '%' "
+	    + "gt.name like '%' || :queryString || '%' "
 	    + "or gt.description like '%' || :queryString || '%' "
 	    + ") "
 	    + "and gt.active in :statuses")
@@ -28,7 +28,7 @@ public interface IGroupTypeRepository extends JpaRepository<GroupType, Long> {
 	    "select count(gt) from GroupType gt "
 	    + "where "
 	    + "( "
-	    + "gt.code like '%' || :queryString || '%' "
+	    + "gt.name like '%' || :queryString || '%' "
 	    + "or gt.description like '%' || :queryString || '%' "
 	    + ") "
 	    + "and gt.active in :statuses")
@@ -38,7 +38,7 @@ public interface IGroupTypeRepository extends JpaRepository<GroupType, Long> {
 	    "select gt from GroupType gt "
 	    + "where "
 	    + "( "
-	    + "gt.code like '%' || :queryString || '%' "
+	    + "gt.name like '%' || :queryString || '%' "
 	    + "or gt.description like '%' || :queryString || '%' "
 	    + ") "
 	    + "and gt.active in :statuses "
@@ -46,7 +46,7 @@ public interface IGroupTypeRepository extends JpaRepository<GroupType, Long> {
     public List<GroupType> search(@Param("queryString") String queryString, @Param("statuses") List<Boolean> statuses,
 	    @Param("excludedIds") List<Long> excludedIds, Pageable pageable);
     
-    public GroupType findByCode(String code);
+    public GroupType findByName(String name);
 
     @Query("select size(gt.groups) from GroupType gt where gt = :groupType")
     public Long countActiveGroups(@Param("groupType") GroupType groupType);

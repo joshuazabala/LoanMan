@@ -8,6 +8,9 @@ import GroupPage from './group/GroupPage';
 import GroupTypePage from './grouptype/GroupTypePage';
 import LoanPage from './loan/LoanPage';
 import LoanTypePage from './loantype/LoanTypePage';
+import SessionPage from './session/SessionPage';
+import UserPage from './user/UserPage';
+import UserProfilePage from './userprofile/UserProfilePage';
 
 
 class Main extends React.Component<RouteComponentProps, any> {
@@ -33,19 +36,21 @@ class Main extends React.Component<RouteComponentProps, any> {
                             <MenuItem content="Groups" targetpath="/group" onClick={this.onNavigate} active={this.isCurrentPath("/cutoff")} />
                             <MenuItem content="Group Types" targetpath="/grouptype" onClick={this.onNavigate} active={this.isCurrentPath("/grouptype")} />
                             <MenuItem content="Users" targetpath="/user" onClick={this.onNavigate} active={this.isCurrentPath("/user")} />
-                            <MenuItem content="User Roles" targetpath="/userrole" onClick={this.onNavigate} active={this.isCurrentPath("/userrole")} />
+                            <MenuItem content="User Profiles" targetpath="/userprofile" onClick={this.onNavigate} active={this.isCurrentPath("/userprofile")} />
+                            <MenuItem content="Sessions" targetpath="/session" onClick={this.onNavigate} active={this.isCurrentPath("/session")} />
                             <MenuItem content="Reports" targetpath="/report" onClick={this.onNavigate} active={this.isCurrentPath("/report")} />
                         </Menu>
                     </div>
-                    <div style={{ marginLeft: 220, paddingLeft: 10, paddingRight: 10 }}>
+                    <div style={{ marginLeft: 230, paddingLeft: 4, paddingRight: 10 }}>
                         <Route path="/loanman/cutoff" component={CutoffPage} />
                         <Route path="/loanman/client" component={ClientPage} />
                         <Route path="/loanman/loan" component={LoanPage} />
                         <Route path="/loanman/loantype" component={LoanTypePage} />
                         <Route path="/loanman/group" component={GroupPage} />
                         <Route path="/loanman/grouptype" component={GroupTypePage} />
-                        <Route path="/loanman/user" />
-                        <Route path="/loanman/userrole" />
+                        <Route path="/loanman/user" component={UserPage} />
+                        <Route path="/loanman/userprofile" component={UserProfilePage} />
+                        <Route path="/loanman/session" component={SessionPage} />
                         <Route path="/loanman/report" />
                     </div>
                 </div>

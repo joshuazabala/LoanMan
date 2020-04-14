@@ -5,6 +5,7 @@ export default class PagedSearchRequest {
     public pageNumber: number;
     public pageSize: number;
     public otherData: any;
+    public columnSorting: object;
 
     public constructor() {
         this.queryString = "";
@@ -13,6 +14,7 @@ export default class PagedSearchRequest {
         this.pageSize = 20;
 
         this.otherData = {};
+        this.columnSorting = {};
     }
 
 }

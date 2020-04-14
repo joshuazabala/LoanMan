@@ -26,7 +26,7 @@ public class Group {
     private boolean active;
 
     @Column(length = 16, nullable = false, unique = true)
-    private String code;
+    private String name;
 
     @Column(length = 512, nullable = false)
     private String description;
@@ -38,20 +38,20 @@ public class Group {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "groups")
     private List<Client> clients;
 
-    public Group(Long id, boolean active, String code, String name, String description) {
+    public Group(Long id, boolean active, String name, String description) {
 	this.id = id;
 	this.active = active;
-	this.code = code;
+	this.name = name;
 	this.description = description;
 	clients = new ArrayList<>();
     }
 
-    public Group(String code, String name, String description) {
-	this(0L, true, code, name, description);
+    public Group(String code, String description) {
+	this(0L, true, code, description);
     }
 
     public Group() {
-	this("", "", "");
+	this("", "");
     }
 
     public Long getId() {
@@ -70,12 +70,12 @@ public class Group {
 	this.active = active;
     }
 
-    public String getCode() {
-	return code;
+    public String getName() {
+	return name;
     }
 
-    public void setCode(String code) {
-	this.code = code;
+    public void setName(String code) {
+	this.name = code;
     }
 
     public String getDescription() {

@@ -179,7 +179,7 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
                     groupTypes.push({
                         key: item.id,
                         value: item.id,
-                        text: item.code + " - " + item.description
+                        text: item.name + " - " + item.description
                     });
                 });
                 this.setState({ groupTypes });

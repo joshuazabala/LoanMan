@@ -3,7 +3,6 @@ package com.codefaucet.LoanMan.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,28 +23,28 @@ public class GroupType {
     private boolean active;
 
     @Column(length = 16, nullable = false, unique = true)
-    private String code;
+    private String name;
 
     @Column(length = 512, nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "type")
     private List<Group> groups;
 
-    public GroupType(Long id, boolean active, String code, String name, String description) {
+    public GroupType(Long id, boolean active, String name, String description) {
 	this.id = id;
 	this.active = active;
-	this.code = code;
+	this.name = name;
 	this.description = description;
 	groups = new ArrayList<>();
     }
 
-    public GroupType(String code, String name, String description) {
-	this(0L, true, code, name, description);
+    public GroupType(String name, String description) {
+	this(0L, true, name, description);
     }
 
     public GroupType() {
-	this("", "", "");
+	this("", "");
     }
 
     public Long getId() {
@@ -64,12 +63,12 @@ public class GroupType {
 	this.active = active;
     }
 
-    public String getCode() {
-	return code;
+    public String getName() {
+	return name;
     }
 
-    public void setCode(String code) {
-	this.code = code;
+    public void setName(String name) {
+	this.name = name;
     }
 
     public String getDescription() {
@@ -86,11 +85,6 @@ public class GroupType {
 
     public void setGroups(List<Group> groups) {
 	this.groups = groups;
-    }
-
-    @Override
-    public String toString() {
-	return code + " - " + description;
     }
 
 }

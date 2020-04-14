@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 
 public class PagedSearchRequest {
 
@@ -16,6 +17,7 @@ public class PagedSearchRequest {
     private int pageNumber;
     private int pageSize;
     private Map<String, Object> otherData;
+    private Map<String, String> columnSorting;
 
     public PagedSearchRequest(String queryString, boolean includeInactive, int pageNumber, int pageSize) {
 	this.queryString = queryString;
@@ -24,6 +26,7 @@ public class PagedSearchRequest {
 	this.pageSize = pageSize;
 
 	otherData = new HashMap<String, Object>();
+	columnSorting = new HashMap<String, String>();
     }
 
     public PagedSearchRequest() {
@@ -70,6 +73,14 @@ public class PagedSearchRequest {
 	this.otherData = otherData;
     }
 
+    public Map<String, String> getColumnSorting() {
+	return columnSorting;
+    }
+
+    public void setColumnSorting(Map<String, String> columnSorting) {
+	this.columnSorting = columnSorting;
+    }
+
     public Pageable createPageable(Sort sort) {
 	return PageRequest.of(pageNumber - 1, pageSize, sort);
     }
@@ -87,4 +98,14 @@ public class PagedSearchRequest {
 	return statusFilter;
     }
 
+    public Sort createSorter() {
+	List<Order> orders = new ArrayList<Sort.Order>();
+	columnSorting.forEach((key, value) -> {
+	    if (value != null) {
+		orders.add(value.equalsIgnoreCase("ascending") ? Order.asc(key) : Order.desc(key));
+	    }
+	});
+	return Sort.by(orders);
+    }
+    
 }

@@ -1,7 +1,9 @@
 package com.codefaucet.LoanMan.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PagedSearchResponse<T> {
 
@@ -9,12 +11,15 @@ public class PagedSearchResponse<T> {
     private long totalPageCount;
     private EnumResponseStatus status;
     private String message;
+    private Map<String, String> columnSorting;
 
     public PagedSearchResponse(List<T> content, long totalPageCount, EnumResponseStatus status, String message) {
 	this.content = content;
 	this.totalPageCount = totalPageCount;
 	this.status = status;
 	this.message = message;
+
+	this.columnSorting = new HashMap<String, String>();
     }
 
     public PagedSearchResponse() {
@@ -52,7 +57,15 @@ public class PagedSearchResponse<T> {
     public void setMessage(String message) {
 	this.message = message;
     }
-    
+
+    public Map<String, String> getColumnSorting() {
+	return columnSorting;
+    }
+
+    public void setColumnSorting(Map<String, String> columnSorting) {
+	this.columnSorting = columnSorting;
+    }
+
     public PagedSearchResponse<T> successful(List<T> content, long totalPageCount) {
 	this.content = content;
 	this.totalPageCount = totalPageCount;
@@ -63,15 +76,15 @@ public class PagedSearchResponse<T> {
     public PagedSearchResponse<T> successful() {
 	return this.successful(getContent(), getTotalPageCount());
     }
-    
+
     public PagedSearchResponse<T> failed(String message) {
 	this.message = message;
 	status = EnumResponseStatus.FAILED;
 	return this;
     }
-    
+
     public PagedSearchResponse<T> failed() {
 	return this.failed("");
     }
-    
+
 }

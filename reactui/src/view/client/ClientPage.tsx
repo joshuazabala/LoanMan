@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
     Button,
+    Container,
     Form,
     FormInput,
     FormProps,
@@ -24,7 +25,6 @@ import {
     TableHeader,
     TableHeaderCell,
     TableRow,
-    Container,
 } from 'semantic-ui-react';
 
 import { EnumResponseStatus } from '../../common/EnumResponseStatus';
@@ -84,8 +84,8 @@ export default class ClientPage extends React.Component {
                     <GridRow columns={2} style={{ paddingBottom: 2, paddingTop: 2 }}>
                         <GridColumn width={8}>
                             <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
-                            {!Util.isBlankOrNullString(this.state.selectedClientNumber) && <Button icon="edit" content="Edit" disabled={this.state.loading} onClick={this.onEdit} />}
-                            {!Util.isBlankOrNullString(this.state.selectedClientNumber) && <Button icon="trash" content="Delete" disabled={this.state.loading} onClick={this.onDelete} />}
+                            <Button icon="edit" primary={true} content="Edit" disabled={this.state.loading || Util.isBlankOrNullString(this.state.selectedClientNumber)} onClick={this.onEdit} />
+                            <Button icon="trash" negative={true} content="Delete" disabled={this.state.loading || Util.isBlankOrNullString(this.state.selectedClientNumber)} onClick={this.onDelete} />
                         </GridColumn>
                         <GridColumn textAlign="right">
                             <Form onSubmit={this.onFormSubmit}>

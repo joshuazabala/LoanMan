@@ -45,10 +45,6 @@ public class Loan {
     @Column(columnDefinition = "date not null")
     private LocalDate paymentStartDate;
 
-    @ManyToOne
-    @JoinColumn(name = "payment_start_cutoff_id", nullable = false)
-    private Cutoff paymentStartCutoff;
-
     @Column(length = 2048)
     private String remarks;
 
@@ -184,14 +180,6 @@ public class Loan {
 
     public void setPenalties(List<Penalty> penalties) {
 	this.penalties = penalties;
-    }
-
-    public Cutoff getPaymentStartCutoff() {
-	return paymentStartCutoff;
-    }
-
-    public void setPaymentStartCutoff(Cutoff paymentStartCutoff) {
-	this.paymentStartCutoff = paymentStartCutoff;
     }
 
     @Override

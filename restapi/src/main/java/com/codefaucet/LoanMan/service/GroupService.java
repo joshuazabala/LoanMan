@@ -23,7 +23,7 @@ public class GroupService {
     }
 
     public List<Group> search(PagedSearchRequest param) {
-	Sort sort = Sort.by(Order.asc("code"));
+	Sort sort = Sort.by(Order.asc("name"));
 	int groupTypeId = (int) param.getOtherData().get("groupTypeId");
 	return groupRepository.search(param.getQueryString(), param.createStatusFilter(), groupTypeId, param.createPageable(sort));
     }
@@ -32,8 +32,8 @@ public class GroupService {
 	return groupRepository.findById(id).get();
     }
 
-    public Group findByCode(String code) {
-	return groupRepository.findByCode(code);
+    public Group findByName(String name) {
+	return groupRepository.findByName(name);
     }
 
     public Group save(Group group) {

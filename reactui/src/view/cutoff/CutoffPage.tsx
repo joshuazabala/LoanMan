@@ -113,15 +113,15 @@ export default class CutoffPage extends React.Component<any, IState> {
                     <GridRow columns={2} style={{ paddingBottom: 2, paddingTop: 2 }}>
                         <GridColumn width={8}>
                             <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
-                            {this.state.selectedId !== 0 && <Button icon="edit" content="Edit" disabled={this.state.loading} onClick={this.onEdit} />}
-                            {this.state.selectedId !== 0 && <Button icon="trash" content="Delete" disabled={this.state.loading} onClick={this.onDelete} />}
+                            <Button icon="edit" primary={true} content="Edit" disabled={this.state.loading || this.state.selectedId === 0} onClick={this.onEdit} />
+                            <Button icon="trash" negative={true} content="Delete" disabled={this.state.loading || this.state.selectedId === 0} onClick={this.onDelete} />
                         </GridColumn>
                         <GridColumn textAlign="right">
                             <Form onSubmit={this.onFormSubmit}>
                                 <FormInput
                                     disabled={this.state.loading}
                                     placeholder="Search"
-                                    action={{ icon: "search", content: "Search" }}
+                                    action={{ icon: "search", content: "Search", primary: true }}
                                     value={this.state.queryString}
                                     onChange={this.onQueryStringChanged}
                                 />

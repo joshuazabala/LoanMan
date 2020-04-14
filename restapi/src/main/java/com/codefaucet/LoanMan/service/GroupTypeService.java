@@ -21,7 +21,7 @@ public class GroupTypeService {
     private IGroupTypeRepository groupTypeRepository;
     
     public List<GroupType> search(PagedSearchRequest param) {
-	Sort sort = Sort.by(Order.asc("code"));
+	Sort sort = param.createSorter();
 	List<GroupType> groupTypes = groupTypeRepository.search(param.getQueryString(), param.createStatusFilter(), param.createPageable(sort));
 	return groupTypes;
     }
@@ -34,8 +34,8 @@ public class GroupTypeService {
 	return groupTypeRepository.findById(id).get();
     }
 
-    public GroupType findByCode(String code) {
-	return groupTypeRepository.findByCode(code);
+    public GroupType findByName(String name) {
+	return groupTypeRepository.findByName(name);
     }
 
     public GroupType save(GroupType groupType) {
@@ -48,7 +48,7 @@ public class GroupTypeService {
     }
 
     public List<GroupType> listGroupTypes() {
-	Sort sort = Sort.by(Order.asc("code"));
+	Sort sort = Sort.by(Order.asc("name"));
 	Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
 	List<Boolean> statusFilter = new ArrayList<Boolean>();
 	statusFilter.add(true);
@@ -56,8 +56,28 @@ public class GroupTypeService {
 	return groupTypes;
     }
 
-    public long getGroupCount(long id) {
-	return groupTypeRepository.getGroupCount(id);
+    public void delete(long groupTypeId) {
+	GroupType groupType = groupTypeRepository.findById(groupTypeId).get();
+	if (groupType.isActive()) {
+	    groupType.setActive(false);
+	    groupTypeRepository.save(groupType);
+	}
+    }
+
+    public void restore(long groupTypeId) {
+	GroupType groupType = groupTypeRepository.findById(groupTypeId).get();
+	if (!groupType.isActive()) {
+	    groupType.setActive(true);
+	    groupTypeRepository.save(groupType);
+	}
+    }
+
+    public GroupType create(GroupType groupType) {
+	return groupTypeRepository.save(groupType);
+    }
+
+    public GroupType edit(GroupType groupType) {
+	return groupTypeRepository.save(groupType);
     }
     
 }

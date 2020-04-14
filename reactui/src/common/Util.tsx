@@ -26,4 +26,21 @@ export default class Util {
         return map;
     }
 
+    public static columnSortingMapToObject = (map: Map<string, "ascending" | "descending" | undefined>) => {
+        const mapObject: { [key: string]: "ascending" | "descending" | undefined } = {};
+        map.forEach((value, key) => {
+            mapObject[key] = value;
+        });
+        return mapObject;
+    }
+
+    public static objectToColumnSortingMap = (model: any) => {
+        const columnSortingMap = new Map<string, "ascending" | "descending" | undefined>();
+        Object.keys(model).forEach(key => {
+            const value = model[key] === "ascending" ? "ascending" : model[key] === "descending" ? "descending" : undefined;
+            columnSortingMap.set(key, value);
+        });
+        return columnSortingMap;
+    }
+
 }

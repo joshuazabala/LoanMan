@@ -53,8 +53,8 @@ public class GroupController {
 
 	    List<GroupDTO> dtos = new ArrayList<GroupDTO>();
 	    groups.forEach(item -> {
-		GroupDTO dto = new GroupDTO(item.getId(), item.isActive(), item.getCode(), item.getDescription(),
-			item.getType().getId(), item.getCode() + " - " + item.getDescription());
+		GroupDTO dto = new GroupDTO(item.getId(), item.isActive(), item.getName(), item.getDescription(),
+			item.getType().getId(), item.getName() + " - " + item.getDescription());
 		dtos.add(dto);
 	    });
 	    return response.successful(dtos, Util.getTotalPage(totalCount, param.getPageSize()));
@@ -70,7 +70,7 @@ public class GroupController {
 	List<GroupType> groupTypes = groupTypeService.listGroupTypes();
 	Map<Long, String> list = new HashMap<Long, String>();
 	groupTypes.forEach(item -> {
-	    list.put(item.getId(), item.getCode() + " - " + item.getDescription());
+	    list.put(item.getId(), item.getName() + " - " + item.getDescription());
 	});
 	return list;
     }
@@ -83,9 +83,9 @@ public class GroupController {
 	Group group = id == 0 ? new Group() : groupService.findById(id);
 	GroupType groupType = group.getType();
 	long groupTypeId = groupType == null ? 0l : groupType.getId();
-	String groupTypeText = groupType == null ? "" : groupType.getCode() + " - " + groupType.getDescription();
+	String groupTypeText = groupType == null ? "" : groupType.getName() + " - " + groupType.getDescription();
 	
-	GroupDTO dto = new GroupDTO(group.getId(), group.isActive(), group.getCode(), group.getDescription(), groupTypeId, groupTypeText);
+	GroupDTO dto = new GroupDTO(group.getId(), group.isActive(), group.getName(), group.getDescription(), groupTypeId, groupTypeText);
 	return dto;
     }
 
@@ -98,13 +98,13 @@ public class GroupController {
 	    GroupDTO dto = param.getContent();
 	    
 	    // basic validation
-	    if (StringHelper.isNullOrEmpty(dto.getCode())) {
-		response.getErrorMap().put("code", "Code can't be empty.");
+	    if (StringHelper.isNullOrEmpty(dto.getName())) {
+		response.getErrorMap().put("name", "Name can't be empty.");
 	    }
-	    if (!StringHelper.isInCharSet(CharSet.ALPHANUMERIC, dto.getCode().trim())) {
-		String codeError = response.getErrorMap().getOrDefault("code", "");
-		codeError += (codeError.isEmpty() ? "" : "<br />") + "Only alphanumeric characters are allowed.";
-		response.getErrorMap().put("code", codeError);
+	    if (!StringHelper.isInCharSet(CharSet.ALPHANUMERIC, dto.getName().trim())) {
+		String nameError = response.getErrorMap().getOrDefault("name", "");
+		nameError += (nameError.isEmpty() ? "" : "<br />") + "Only alphanumeric characters are allowed.";
+		response.getErrorMap().put("name", nameError);
 	    }
 	    if (StringHelper.isNullOrEmpty(dto.getDescription())) {
 		response.getErrorMap().put("description", "Description can't be empty.");
@@ -116,23 +116,23 @@ public class GroupController {
 		return response.failed();
 	    }
 	    
-	    dto.setCode(dto.getCode().trim().toUpperCase());
+	    dto.setName(dto.getName().trim().toUpperCase());
 	    dto.setDescription(dto.getDescription().trim());
 	    
-	    // check if code is used by another
-	    Group model = groupService.findByCode(param.getContent().getCode());
+	    // check if name is used by another
+	    Group model = groupService.findByName(param.getContent().getName());
 	    if (model != null && model.getId() != dto.getId()) {
-		response.getErrorMap().put("code", "Code '" + dto.getCode() + "' is not available.");
+		response.getErrorMap().put("name", "Name '" + dto.getName() + "' is not available.");
 		return response.failed();
 	    }
 	    
-	    // if found by above query and code validation has no problem, then we already have the correct one
+	    // if found by above query and name validation has no problem, then we already have the correct one
 	    if (model == null) {
 		model = param.getContent().getId() == 0 ? new Group() : groupService.findById(param.getContent().getId());
 	    } 
 	    
 	    // map values
-	    model.setCode(dto.getCode());
+	    model.setName(dto.getName());
 	    model.setDescription(dto.getDescription());
 	    if (model.getType() == null || dto.getGroupTypeId() != model.getType().getId()) {
 		GroupType groupType = groupTypeService.findById(dto.getGroupTypeId());

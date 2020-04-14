@@ -65,7 +65,7 @@ public class PaymentController {
 	    if (cutoff.getStatus() == EnumCutoffStatus.POSTED) {
 		return response.failed("This cutoff is already posted.");
 	    }
-	    if (cutoff.getStartDate().isBefore(loan.getPaymentStartCutoff().getStartDate())) {
+	    if (cutoff.getStartDate().isBefore(loan.getPaymentStartDate())) {
 		return response.failed("Requested cutoff is before the start of payment of selected loan.");
 	    }
 	    

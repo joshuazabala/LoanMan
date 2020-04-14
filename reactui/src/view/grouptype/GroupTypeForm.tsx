@@ -34,14 +34,14 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
                 <ModalContent>
                     <Form onSubmit={this.onSubmit}>
                         <FormInput
-                            label="Code"
-                            value={this.state.content.code}
-                            fieldname="code"
+                            label="Name"
+                            value={this.state.content.name}
+                            fieldname="name"
                             onChange={this.onInputChange}
                             maxLength="16"
                             width={8}
                             disabled={this.state.loading}
-                            error={this.state.errorMap.get("code")}
+                            error={this.state.errorMap.get("name")}
                         />
                         <FormInput
                             label="Description"
@@ -92,8 +92,8 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
     private onSave = () => {
         const content = this.state.content;
         const errorMap = new Map<string, string>();
-        if (Util.isBlankOrNullString(content.code)) {
-            errorMap.set("code", "Code is required.");
+        if (Util.isBlankOrNullString(content.name)) {
+            errorMap.set("name", "Name is required.");
         }
         if (Util.isBlankOrNullString(content.description)) {
             errorMap.set("description", "Description is required.");
@@ -110,8 +110,8 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
 
     private onInputChange = (event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) => {
         const content = this.state.content;
-        if (data.fieldname === "code") {
-            content.code = data.value.toUpperCase();
+        if (data.fieldname === "name") {
+            content.name = data.value;
         } else if (data.fieldname === "description") {
             content.description = data.value;
         }
