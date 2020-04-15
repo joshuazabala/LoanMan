@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.codefaucet.LoanMan.common.PagedSearchRequest;
@@ -22,7 +21,7 @@ public class LoanTypeService {
     }
 
     public List<LoanType> search(PagedSearchRequest param) {
-	Sort sort = Sort.by(Order.asc("code"));
+	Sort sort = param.createSorter();
 	List<LoanType> loanTypes = loanTypeRepository.search(param.getQueryString(), param.createStatusFilter(), param.createPageable(sort));
 	return loanTypes;
     }
@@ -35,17 +34,32 @@ public class LoanTypeService {
 	return loanTypeRepository.findById(id).get();
     }
 
-    public LoanType findByCode(String code) {
-	return loanTypeRepository.findByCode(code);
+    public LoanType findByName(String name) {
+	return loanTypeRepository.findByName(name);
     }
 
-    public void deleteById(long id) {
-	LoanType loanType = loanTypeRepository.findById(id).get();
-	loanTypeRepository.delete(loanType);
+    public void delete(long loanTypeId) {
+	LoanType loanType = loanTypeRepository.findById(loanTypeId).get();
+	if (loanType.isActive()) {
+	    loanType.setActive(false);
+	    loanTypeRepository.save(loanType);
+	}
+    }
+    
+    public void restore(long loanTypeId) {
+	LoanType loanType = loanTypeRepository.findById(loanTypeId).get();
+	if (!loanType.isActive()) {
+	    loanType.setActive(true);
+	    loanTypeRepository.save(loanType);
+	}
     }
 
-    public long getLoanCount(long id) {
-	return loanTypeRepository.getLoanCount(id);
+    public LoanType create(LoanType loanType) {
+	return loanTypeRepository.save(loanType);
+    }
+
+    public LoanType edit(LoanType loanType) {
+	return loanTypeRepository.save(loanType);
     }
     
 }

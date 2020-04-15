@@ -267,9 +267,6 @@ export default class UserProfileForm extends React.Component<IFormProps, IFormSt
         if (Util.isBlankOrNullString(content.name)) {
             errorMap.set("name", "Name is required.");
         }
-        if (Util.isBlankOrNullString(content.description)) {
-            errorMap.set("description", "Description is required.");
-        }
         this.setState(
             { errorMap },
             () => {

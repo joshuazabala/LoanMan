@@ -315,7 +315,7 @@ export default class LoanForm extends React.Component<IFormProps, IState> {
                         loanTypes.push({
                             key: item.id,
                             value: item.id,
-                            text: item.code + " - " + item.description
+                            text: item.name + " - " + item.description
                         });
                     });
                     this.setState({ loanTypes });

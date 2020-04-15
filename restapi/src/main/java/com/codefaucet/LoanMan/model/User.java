@@ -36,7 +36,7 @@ public class User {
 
     @Column(length = 32)
     private String contactNumber;
-    @Column(length = 32)
+    @Column(length = 64)
     private String emailAddress;
 
     @ManyToOne

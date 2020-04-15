@@ -121,7 +121,7 @@ export default class UserForm extends React.Component<IFormProps, IState> {
                             fieldname="emailAddress"
                             onChange={this.onInputChange}
                             error={this.state.errorMap.get("contactNumber")}
-                            maxLength={128}
+                            maxLength={64}
                         />
                         {
                             !Util.isBlankOrNullString(this.state.errorMessage) &&

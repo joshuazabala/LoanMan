@@ -22,10 +22,10 @@ public class GroupType {
     @Column(columnDefinition = "tinyint(1) not null default 1")
     private boolean active;
 
-    @Column(length = 16, nullable = false, unique = true)
+    @Column(length = 32, nullable = false, unique = true)
     private String name;
 
-    @Column(length = 512, nullable = false)
+    @Column(length = 512)
     private String description;
 
     @OneToMany(mappedBy = "type")

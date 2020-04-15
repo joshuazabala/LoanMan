@@ -31,32 +31,32 @@ public class LoanType {
     @Column(length = 12, nullable = false)
     private EnumCutoffFrequency paymentFrequency;
 
-    @Column(length = 16, nullable = false, unique = true)
-    private String code;
+    @Column(length = 32, nullable = false, unique = true)
+    private String name;
 
-    @Column(length = 528, nullable = false)
+    @Column(length = 512)
     private String description;
 
     @OneToMany(mappedBy = "loanType", fetch = FetchType.LAZY)
     private List<Loan> loans;
 
-    public LoanType(Long id, boolean active, EnumCutoffFrequency paymentFrequency, String code, String name,
+    public LoanType(Long id, boolean active, EnumCutoffFrequency paymentFrequency, String name,
 	    String description) {
 	this.id = id;
 	this.active = active;
 	this.paymentFrequency = paymentFrequency;
-	this.code = code;
+	this.name = name;
 	this.description = description;
 
 	loans = new ArrayList<Loan>();
     }
 
-    public LoanType(EnumCutoffFrequency paymentFrequency, String code, String name, String description) {
-	this(0L, true, paymentFrequency, code, name, description);
+    public LoanType(EnumCutoffFrequency paymentFrequency, String name, String description) {
+	this(0L, true, paymentFrequency, name, description);
     }
 
     public LoanType() {
-	this(EnumCutoffFrequency.MONTHLY, "", "", "");
+	this(EnumCutoffFrequency.MONTHLY, "", "");
     }
 
     public Long getId() {
@@ -83,12 +83,12 @@ public class LoanType {
 	this.paymentFrequency = paymentFrequency;
     }
 
-    public String getCode() {
-	return code;
+    public String getName() {
+	return name;
     }
 
-    public void setCode(String code) {
-	this.code = code;
+    public void setName(String code) {
+	this.name = code;
     }
 
     public String getDescription() {

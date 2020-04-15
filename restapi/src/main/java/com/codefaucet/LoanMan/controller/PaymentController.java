@@ -24,7 +24,6 @@ import com.codefaucet.LoanMan.model.Cutoff;
 import com.codefaucet.LoanMan.model.Loan;
 import com.codefaucet.LoanMan.service.CutoffService;
 import com.codefaucet.LoanMan.service.LoanService;
-import com.codefaucet.LoanMan.service.PaymentService;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -34,9 +33,6 @@ public class PaymentController {
     
     @Autowired
     private LoggingHelper loggingHelper;
-    
-    @Autowired
-    private PaymentService paymentService;
     
     @Autowired
     private LoanService loanService;

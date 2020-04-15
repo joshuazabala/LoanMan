@@ -263,13 +263,13 @@ export default class GroupTypePage extends React.Component<any, IState> {
         );
     }
 
-    private showGroupTypeForm = (id: number) => {
+    private showForm = (id: number) => {
         fetchGet<GroupType>("/grouptype/findById/" + id)
             .then(item => {
                 this.setState(
                     { formVisible: true },
                     () => {
-                        this.formRef.current!.setState({ content: item });
+                        this.formRef.current!.setState({ content: item, errorMap: new Map<string, string>() });
                     }
                 );
             });
@@ -319,7 +319,7 @@ export default class GroupTypePage extends React.Component<any, IState> {
     }
 
     private onAdd = () => {
-        this.showGroupTypeForm(0);
+        this.showForm(0);
     }
 
     private onEdit = () => {
@@ -327,7 +327,7 @@ export default class GroupTypePage extends React.Component<any, IState> {
             return;
         }
 
-        this.showGroupTypeForm(this.state.selectedId);
+        this.showForm(this.state.selectedId);
     }
 
     private onDelete = () => {

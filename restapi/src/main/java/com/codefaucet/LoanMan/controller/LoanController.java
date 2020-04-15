@@ -64,7 +64,7 @@ public class LoanController {
 		    dto.setClientId(item.getClient().getId());
 		}
 		if (item.getLoanType() != null) {
-		    dto.setLoanType(item.getLoanType().getCode() + " - " + item.getLoanType().getDescription());
+		    dto.setLoanType(item.getLoanType().getName() + " - " + item.getLoanType().getDescription());
 		    dto.setLoanTypeId(item.getLoanType().getId());
 		}
 		dtos.add(dto);
@@ -92,7 +92,7 @@ public class LoanController {
 	    dto.setClientId(loan.getClient().getId());
 	}
 	if (loan.getLoanType() != null) {
-	    dto.setLoanType(loan.getLoanType().getCode() + " - " + loan.getLoanType().getDescription());
+	    dto.setLoanType(loan.getLoanType().getName() + " - " + loan.getLoanType().getDescription());
 	    dto.setLoanTypeId(loan.getLoanType().getId());
 	}
 	return dto;
@@ -148,7 +148,7 @@ public class LoanController {
 	    loan = loanService.save(loan);
 	    dto.setId(loan.getId());
 	    dto.setClient(loan.getClient().getName());
-	    dto.setLoanType(loan.getLoanType().getCode() + " - " + loan.getLoanType().getDescription());
+	    dto.setLoanType(loan.getLoanType().getName() + " - " + loan.getLoanType().getDescription());
 	    
 	    return response.successful(dto);
 	} catch (Exception ex) {

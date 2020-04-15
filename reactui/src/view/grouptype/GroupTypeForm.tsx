@@ -38,8 +38,7 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
                             value={this.state.content.name}
                             fieldname="name"
                             onChange={this.onInputChange}
-                            maxLength="16"
-                            width={8}
+                            maxLength="32"
                             disabled={this.state.loading}
                             error={this.state.errorMap.get("name")}
                         />
@@ -94,9 +93,6 @@ export default class GroupTypeForm extends React.Component<IFormProps, IFormStat
         const errorMap = new Map<string, string>();
         if (Util.isBlankOrNullString(content.name)) {
             errorMap.set("name", "Name is required.");
-        }
-        if (Util.isBlankOrNullString(content.description)) {
-            errorMap.set("description", "Description is required.");
         }
         this.setState(
             { errorMap },

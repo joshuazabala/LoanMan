@@ -10,17 +10,19 @@ public class GroupDTO {
     private long groupTypeId;
     private String groupType;
 
-    public GroupDTO(long id, boolean active, String name, String description, long groupTypeId, String groupType) {
+    public GroupDTO(long id, boolean active, String name, String description) {
 	this.id = id;
 	this.active = active;
 	this.name = name;
 	this.description = description;
-	this.groupTypeId = groupTypeId;
-	this.groupType = groupType;
+    }
+
+    public GroupDTO(String name, String description) {
+	this(0l, true, name, description);
     }
 
     public GroupDTO() {
-	this(0l, true, "", "", 0l, "");
+	this("", "");
     }
 
     public long getId() {

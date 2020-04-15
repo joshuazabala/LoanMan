@@ -66,14 +66,13 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
                             error={this.state.errorMap.get("groupTypeId")}
                         />
                         <FormInput
-                            label="Code"
-                            value={this.state.content.code}
-                            fieldname="code"
+                            label="Name"
+                            value={this.state.content.name}
+                            fieldname="name"
                             onChange={this.onInputChange}
-                            maxLength="16"
-                            width={8}
+                            maxLength="32"
                             disabled={this.state.loading}
-                            error={this.state.errorMap.get("code")}
+                            error={this.state.errorMap.get("name")}
                         />
                         <FormInput
                             label="Description"
@@ -124,7 +123,7 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
     private onSave = () => {
         const content = this.state.content;
         const errorMap = new Map<string, string>();
-        if (Util.isBlankOrNullString(content.code)) {
+        if (Util.isBlankOrNullString(content.name)) {
             errorMap.set("code", "Code is required.");
         }
         if (Util.isBlankOrNullString(content.description)) {
@@ -145,8 +144,8 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
 
     private onInputChange = (event: React.ChangeEvent<HTMLInputElement>, data: InputOnChangeData) => {
         const content = this.state.content;
-        if (data.fieldname === "code") {
-            content.code = data.value;
+        if (data.fieldname === "name") {
+            content.name = data.value;
         } else if (data.fieldname === "description") {
             content.description = data.value;
         }
@@ -179,7 +178,7 @@ export default class GroupForm extends React.Component<IFormProps, IState> {
                     groupTypes.push({
                         key: item.id,
                         value: item.id,
-                        text: item.name + " - " + item.description
+                        text: item.name
                     });
                 });
                 this.setState({ groupTypes });

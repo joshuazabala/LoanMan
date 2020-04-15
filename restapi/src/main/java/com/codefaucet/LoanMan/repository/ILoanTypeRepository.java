@@ -17,7 +17,7 @@ public interface ILoanTypeRepository extends JpaRepository<LoanType, Long> {
 	    "select lt from LoanType lt "
 	    + "where "
 	    + "("
-	    + "lt.code like concat(:needle, '%') "
+	    + "lt.name like concat(:needle, '%') "
 	    + "or lt.description like concat(:needle, '%')"
 	    + ") "
 	    + "and lt.active in :statuses")
@@ -28,7 +28,7 @@ public interface ILoanTypeRepository extends JpaRepository<LoanType, Long> {
 	    "select count(lt) from LoanType lt "
 	    + "where "
 	    + "( "
-	    + "lt.code like '%' || :queryString || '%' "
+	    + "lt.name like '%' || :queryString || '%' "
 	    + "or lt.description like '%' || :queryString || '%' "
 	    + ") "
 	    + "and lt.active in :statuses")
@@ -38,7 +38,7 @@ public interface ILoanTypeRepository extends JpaRepository<LoanType, Long> {
 	    "select lt from LoanType lt "
 	    + "where "
 	    + "("
-	    + "lt.code like concat(:needle, '%') "
+	    + "lt.name like concat(:needle, '%') "
 	    + "or lt.description like concat(:needle, '%')"
 	    + ") "
 	    + "and lt.id not in :excludedIds "
@@ -46,7 +46,7 @@ public interface ILoanTypeRepository extends JpaRepository<LoanType, Long> {
     public List<LoanType> search(@Param("needle") String needle, @Param("statuses") List<Boolean> statuses,
 	    @Param("excludedIds") List<Long> excludedIds, Pageable pageable);
 
-    public LoanType findByCode(String code);
+    public LoanType findByName(String name);
 
     @Query("select size(lt.loans) from LoanType lt where lt.id = :id")
     public long getLoanCount(long id);

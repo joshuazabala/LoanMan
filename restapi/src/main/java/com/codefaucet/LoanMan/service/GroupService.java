@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.codefaucet.LoanMan.common.PagedSearchRequest;
@@ -23,7 +22,7 @@ public class GroupService {
     }
 
     public List<Group> search(PagedSearchRequest param) {
-	Sort sort = Sort.by(Order.asc("name"));
+	Sort sort = param.createSorter();
 	int groupTypeId = (int) param.getOtherData().get("groupTypeId");
 	return groupRepository.search(param.getQueryString(), param.createStatusFilter(), groupTypeId, param.createPageable(sort));
     }
@@ -36,17 +35,32 @@ public class GroupService {
 	return groupRepository.findByName(name);
     }
 
-    public Group save(Group group) {
-	return groupRepository.save(group);
-    }
-
-    public void deleteById(long id) {
-	Group model = groupRepository.findById(id).get();
-	groupRepository.delete(model);
-    }
-
     public long getMemberCount(long id) {
 	return groupRepository.getMemberCount(id);
+    }
+
+    public void delete(long groupId) {
+	Group group = groupRepository.findById(groupId).get();
+	if (group.isActive()) {
+	    group.setActive(false);
+	    groupRepository.save(group);
+	}
+    }
+    
+    public void restore(long groupId) {
+	Group group = groupRepository.findById(groupId).get();
+	if (!group.isActive()) {
+	    group.setActive(true);
+	    groupRepository.save(group);
+	}
+    }
+
+    public Group create(Group group) {
+	return groupRepository.save(group);
+    }
+    
+    public Group edit(Group group) {
+	return groupRepository.save(group);
     }
     
 }

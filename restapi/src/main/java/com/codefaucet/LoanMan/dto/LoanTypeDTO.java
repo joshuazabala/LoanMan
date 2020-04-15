@@ -1,21 +1,29 @@
 package com.codefaucet.LoanMan.dto;
 
+import com.codefaucet.LoanMan.common.EnumCutoffFrequency;
+
 public class LoanTypeDTO {
 
     private long id;
     private boolean active;
-    private String code;
+    private EnumCutoffFrequency paymentFrequency;
+    private String name;
     private String description;
 
-    public LoanTypeDTO(long id, boolean active, String code, String description) {
+    public LoanTypeDTO(long id, boolean active, EnumCutoffFrequency paymentFrequency, String name, String description) {
 	this.id = id;
 	this.active = active;
-	this.code = code;
+	this.paymentFrequency = paymentFrequency;
+	this.name = name;
 	this.description = description;
     }
 
+    public LoanTypeDTO(EnumCutoffFrequency paymentFrequency, String name, String description) {
+	this(0l, true, paymentFrequency, name, description);
+    }
+
     public LoanTypeDTO() {
-	this(0l, true, "", "");
+	this(EnumCutoffFrequency.MONTHLY, "", "");
     }
 
     public long getId() {
@@ -34,12 +42,20 @@ public class LoanTypeDTO {
 	this.active = active;
     }
 
-    public String getCode() {
-	return code;
+    public EnumCutoffFrequency getPaymentFrequency() {
+	return paymentFrequency;
     }
 
-    public void setCode(String code) {
-	this.code = code;
+    public void setPaymentFrequency(EnumCutoffFrequency paymentFrequency) {
+	this.paymentFrequency = paymentFrequency;
+    }
+
+    public String getName() {
+	return name;
+    }
+
+    public void setName(String name) {
+	this.name = name;
     }
 
     public String getDescription() {

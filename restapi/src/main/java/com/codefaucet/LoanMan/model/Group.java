@@ -25,10 +25,10 @@ public class Group {
     @Column(columnDefinition = "tinyint(1) not null default 1")
     private boolean active;
 
-    @Column(length = 16, nullable = false, unique = true)
+    @Column(length = 32, nullable = false, unique = true)
     private String name;
 
-    @Column(length = 512, nullable = false)
+    @Column(length = 512)
     private String description;
 
     @ManyToOne
@@ -46,8 +46,8 @@ public class Group {
 	clients = new ArrayList<>();
     }
 
-    public Group(String code, String description) {
-	this(0L, true, code, description);
+    public Group(String name, String description) {
+	this(0L, true, name, description);
     }
 
     public Group() {

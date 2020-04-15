@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
     Button,
+    ButtonProps,
     Container,
     Form,
     FormInput,
@@ -12,10 +13,6 @@ import {
     Icon,
     InputOnChangeData,
     Loader,
-    Modal,
-    ModalActions,
-    ModalContent,
-    ModalHeader,
     Pagination,
     PaginationProps,
     Table,
@@ -27,20 +24,23 @@ import {
     TableRow,
 } from 'semantic-ui-react';
 
+import { EnumCommonAction } from '../../common/EnumCommonAction';
 import { EnumResponseStatus } from '../../common/EnumResponseStatus';
 import IPageState from '../../common/IPageState';
 import PagedSearchRequest from '../../common/PagedSearchRequest';
 import PagedSearchResponse from '../../common/PagedSearchResponse';
 import PageStat from '../../common/PageStat';
-import { fetchPost } from '../../common/Request';
-import RequestContainer from '../../common/RequestContainer';
+import { fetchGet, fetchGetNoReturn, fetchPost } from '../../common/Request';
 import ResponseContainer from '../../common/ResponseContainer';
 import Util from '../../common/Util';
 import LoanType from '../../model/LoanType';
+import DeleteRestoreDialog from '../common/DeleteRestoreDialog';
+import FilterDialog from '../common/FilterDialog';
 import LoanTypeForm from './LoanTypeForm';
 
 interface IState extends IPageState<LoanType> {
-    deleteModalVisible: boolean
+    deleteRestoreModalVisible: boolean,
+    filterDialogVisible: boolean
 }
 
 export default class LoanTypePage extends React.Component {
@@ -53,16 +53,21 @@ export default class LoanTypePage extends React.Component {
         pageStat: new PageStat(),
         queryString: "",
         formVisible: false,
-        deleteModalVisible: false,
-        initialized: false
+        deleteRestoreModalVisible: false,
+        initialized: false,
+        filterDialogVisible: false
     }
 
     private formRef = React.createRef<LoanTypeForm>();
+    private deleteRestoreDialogRef = React.createRef<DeleteRestoreDialog>();
+    private filterDialogRef = React.createRef<FilterDialog>();
 
     public componentDidMount() {
         if (!this.state.initialized) {
+            const pageStat = this.state.pageStat;
+            pageStat.columnSorting.set("name", "ascending");
             this.setState(
-                { initialized: true },
+                { initialized: true, pageStat },
                 () => {
                     this.search();
                 }
@@ -71,6 +76,10 @@ export default class LoanTypePage extends React.Component {
     }
 
     public render() {
+        let selectedActive = true;
+        if (this.state.selectedId !== 0) {
+            selectedActive = this.state.contents.filter(item => item.id === this.state.selectedId)[0].active;
+        }
         return (
             <Container fluid={true}>
                 <Grid>
@@ -83,35 +92,61 @@ export default class LoanTypePage extends React.Component {
                         <GridColumn width={8}>
                             <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
                             <Button icon="edit" primary={true} content="Edit" disabled={this.state.loading || this.state.selectedId === 0} onClick={this.onEdit} />
-                            <Button icon="trash" negative={true} content="Delete" disabled={this.state.loading || this.state.selectedId === 0} onClick={this.onDelete} />
+                            {
+                                selectedActive &&
+                                <Button
+                                    icon="trash"
+                                    negative={true}
+                                    content="Delete"
+                                    disabled={this.state.loading || this.state.selectedId === 0}
+                                    action={EnumCommonAction.DELETE}
+                                    onClick={this.onDeleteOrRestore}
+                                />
+                            }
+                            {
+                                !selectedActive &&
+                                <Button
+                                    icon="undo"
+                                    positive={true}
+                                    content="Restore"
+                                    disabled={this.state.loading || this.state.selectedId === 0}
+                                    action={EnumCommonAction.RESTORE}
+                                    onClick={this.onDeleteOrRestore}
+                                />
+                            }
                         </GridColumn>
                         <GridColumn textAlign="right">
                             <Form onSubmit={this.onFormSubmit}>
                                 <FormInput
                                     disabled={this.state.loading}
                                     placeholder="Search"
-                                    action={{ icon: "search", content: "Search", primary: true }}
                                     value={this.state.queryString}
                                     onChange={this.onQueryStringChanged}
-                                />
+                                >
+                                    <input style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }} />
+                                    <Button icon="search" content="Search" primary={true} style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }} />
+                                    <Button icon="cog" type="button" onClick={this.showFilterDialog} />
+                                </FormInput>
                             </Form>
                         </GridColumn>
                     </GridRow>
                     <GridRow style={{ paddingBottom: 40, paddingTop: 2 }}>
                         <GridColumn>
-                            <Table celled={true} striped={true} selectable={true}>
+                            <Table celled={true} striped={true} selectable={true} sortable={true}>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHeaderCell width={3}>Code</TableHeaderCell>
-                                        <TableHeaderCell width={13}>Description</TableHeaderCell>
+                                        <TableHeaderCell width={4} data-columnname="name" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("name")}>Name</TableHeaderCell>
+                                        <TableHeaderCell width={4} data-columnname="paymentFrequency" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("paymentFrequency")}>Payment Frequency</TableHeaderCell>
+                                        <TableHeaderCell width={8} data-columnname="description" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("description")}>Description</TableHeaderCell>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {
                                         this.state.contents.map((item, index) => {
                                             return (
-                                                <TableRow key={index} data-loantypeid={item.id} onClick={this.onRowClick} active={this.state.selectedId === item.id}>
-                                                    <TableCell>{item.code}</TableCell>
+                                                <TableRow key={index} data-loantypeid={item.id} onClick={this.onRowClick} active={this.state.selectedId === item.id} negative={!item.active}>
+                                                    <TableCell>{item.name}</TableCell>
+                                                    <TableCell>{item.paymentFrequency}</TableCell>
                                                     <TableCell>{item.description}</TableCell>
                                                 </TableRow>
                                             )
@@ -120,7 +155,7 @@ export default class LoanTypePage extends React.Component {
                                 </TableBody>
                                 <TableFooter>
                                     <TableRow>
-                                        <TableHeaderCell colSpan={2} textAlign="right">
+                                        <TableHeaderCell colSpan={3} textAlign="right">
                                             <Loader active={this.state.loading} />
                                             <Pagination
                                                 disabled={this.state.loading}
@@ -147,24 +182,23 @@ export default class LoanTypePage extends React.Component {
                         onSaved={this.onFormSaved}
                     />
 
-                    <Modal open={this.state.deleteModalVisible} size="small">
-                        <ModalHeader>Confirm Action</ModalHeader>
-                        <ModalContent>Delete selected loan type?</ModalContent>
-                        <ModalActions>
-                            <Button
-                                negative={true}
-                                content="Delete"
-                                onClick={this.delete}
-                                disabled={this.state.loading}
-                            />
-                            <Button
-                                content="Cancel"
-                                onClick={this.onCancelDelete}
-                                disabled={this.state.loading}
-                            />
-                        </ModalActions>
-                        <Loader active={this.state.loading} />
-                    </Modal>
+                    <DeleteRestoreDialog
+                        onCancel={this.onCancelDeleteOrRestore}
+                        onDelete={this.onDelete}
+                        onRestore={this.onRestore}
+                        open={this.state.deleteRestoreModalVisible}
+                        size="small"
+                        ref={this.deleteRestoreDialogRef}
+                    />
+
+                    <FilterDialog
+                        onClose={this.onFilterDialogClose}
+                        onReset={this.onFilterDialogReset}
+                        onSaveAndSearch={this.onFilterDialogSaveAndSearch}
+                        open={this.state.filterDialogVisible}
+                        ref={this.filterDialogRef}
+                        size="small"
+                    />
 
                 </Grid>
             </Container>
@@ -196,7 +230,7 @@ export default class LoanTypePage extends React.Component {
         const pageStat = this.state.pageStat;
         pageStat.currentPage = data.activePage as number;
         this.setState(
-            { pageStat },
+            { pageStat, selectedId: 0 },
             () => {
                 this.search();
             }
@@ -205,10 +239,11 @@ export default class LoanTypePage extends React.Component {
 
     private search = () => {
         const requestParam = new PagedSearchRequest();
-        requestParam.includeInactive = false;
+        requestParam.includeInactive = this.state.pageStat.showInactive;
         requestParam.pageNumber = this.state.pageStat.currentPage;
         requestParam.pageSize = this.state.pageStat.pageSize;
         requestParam.queryString = this.state.queryString;
+        requestParam.columnSorting = Util.columnSortingMapToObject(this.state.pageStat.columnSorting);
 
         this.setState(
             {
@@ -220,6 +255,7 @@ export default class LoanTypePage extends React.Component {
                         if (result.status === EnumResponseStatus.SUCCESSFUL) {
                             const pageStat = this.state.pageStat;
                             pageStat.totalPageCount = result.totalPageCount;
+                            pageStat.columnSorting = Util.objectToColumnSortingMap(result.columnSorting);
                             this.setState({
                                 contents: result.content,
                                 loading: false,
@@ -239,17 +275,15 @@ export default class LoanTypePage extends React.Component {
     }
 
     private showForm = (id: number) => {
-        const requestParam = { id };
-
-        fetchPost<{ id: number }, LoanType>("/loantype/findById", requestParam)
-            .then(item => {
-                this.setState(
-                    { formVisible: true },
-                    () => {
-                        this.formRef.current!.setState({ content: item });
-                    }
-                );
-            });
+        fetchGet<LoanType>("/loantype/findById/" + id)
+        .then((item) => {
+            this.setState(
+                { formVisible: true },
+                () => {
+                    this.formRef.current!.setState({ content: item, errorMap: new Map<string, string>() });
+                }
+            );
+        });
     }
 
     private onFormCancelled = () => {
@@ -261,10 +295,8 @@ export default class LoanTypePage extends React.Component {
             { loading: true },
             () => {
                 const content = this.formRef.current!.state.content;
-                const requestParam = new RequestContainer<LoanType>();
-                requestParam.content = content;
-
-                fetchPost<RequestContainer<LoanType>, ResponseContainer<LoanType>>("/loantype/save", requestParam)
+                const url = "/loantype/" + (content.id === 0 ? "create" : "edit");
+                fetchPost<LoanType, ResponseContainer<LoanType>>(url, content)
                     .then(response => {
                         this.formRef.current!.setState(
                             { loading: false },
@@ -309,34 +341,111 @@ export default class LoanTypePage extends React.Component {
     }
 
     private onDelete = () => {
-        this.setState({ deleteModalVisible: true });
+        const id = this.deleteRestoreDialogRef.current!.state.id;
+        this.deleteOrRestore(EnumCommonAction.DELETE, id as number);
     }
 
-    private onCancelDelete = () => {
-        this.setState({ deleteModalVisible: false });
+    private onDeleteOrRestore = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: ButtonProps) => {
+        const action = data.action as EnumCommonAction;
+        this.setState(
+            { deleteRestoreModalVisible: true },
+            () => {
+                this.deleteRestoreDialogRef.current!.setState({
+                    header: "Confirm Action",
+                    id: this.state.selectedId,
+                    message: (action === EnumCommonAction.RESTORE ? "Restore " : "Delete ") + "selected loan type?",
+                    mode: action === EnumCommonAction.RESTORE ? EnumCommonAction.RESTORE : EnumCommonAction.DELETE
+                });
+            }
+        );
     }
 
-    private delete = () => {
-        const requestParam = new RequestContainer<number>();
-        requestParam.content = this.state.selectedId;
+    private showFilterDialog = () => {
+        const pageStat = this.state.pageStat;
+        this.setState(
+            { filterDialogVisible: true },
+            () => {
+                this.filterDialogRef.current!.setState({
+                    itemsPerPage: pageStat.pageSize,
+                    showInactive: pageStat.showInactive
+                });
+            }
+        );
+    }
 
+    private onColumnSort = (event: any) => {
+        const columnname = event.currentTarget.getAttribute("data-columnname") as string;
+        const pageStat = this.state.pageStat;
+        const currentOrder = pageStat.columnSorting.get(columnname);
+        const newOrder = currentOrder === undefined ? "ascending" : currentOrder === "ascending" ? "descending" : currentOrder === "descending" ? undefined : undefined;
+        pageStat.columnSorting.set(columnname, newOrder);
+        pageStat.currentPage = 1;
+        this.setState(
+            { pageStat, selectedId: 0 },
+            () => {
+                this.search();
+            }
+        );
+    }
+
+    private onCancelDeleteOrRestore = () => {
+        this.setState({ deleteRestoreModalVisible: false });
+    }
+
+    private onRestore = () => {
+        const id = this.deleteRestoreDialogRef.current!.state.id;
+        this.deleteOrRestore(EnumCommonAction.RESTORE, id as number);
+    }
+
+    private onFilterDialogClose = () => {
+        this.setState({ filterDialogVisible: false });
+    }
+
+    private onFilterDialogReset = () => {
+        this.filterDialogRef.current!.setState({
+            itemsPerPage: 20,
+            showInactive: false
+        });
+    }
+
+    private onFilterDialogSaveAndSearch = () => {
+        const filterState = this.filterDialogRef.current!.state;
+        const pageStat = this.state.pageStat;
+        pageStat.pageSize = filterState.itemsPerPage;
+        pageStat.showInactive = filterState.showInactive;
+        pageStat.currentPage = 1;
+        this.setState(
+            { pageStat, filterDialogVisible: false },
+            () => {
+                this.search();
+            }
+        );
+    }
+
+    private deleteOrRestore = (mode: EnumCommonAction.DELETE | EnumCommonAction.RESTORE, id: number) => {
+        const url = "/loantype/" + (mode === EnumCommonAction.RESTORE ? "restore" : "delete") + "/" + id;
         this.setState(
             { loading: true },
             () => {
-                fetchPost<RequestContainer<number>, ResponseContainer<boolean>>("/loantype/delete", requestParam)
-                    .then(response => {
-                        if (response.status === EnumResponseStatus.SUCCESSFUL) {
-                            let contents = this.state.contents;
-                            contents = contents.filter(item => item.id !== this.state.selectedId);
-                            this.setState({
-                                contents: contents,
-                                selectedId: 0,
-                                deleteModalVisible: false,
-                                loading: false
-                            });
+                fetchGetNoReturn(url)
+                    .then(() => {
+                        let contents = this.state.contents;
+                        if (mode === EnumCommonAction.RESTORE) {
+                            const index = contents.findIndex(item => item.id === id);
+                            contents[index].active = true;
                         } else {
-                            alert("Error: " + response.message);
+                            if (this.state.pageStat.showInactive) {
+                                contents.find(item => item.id === id)!.active = false;
+                            } else {
+                                contents = contents.filter(item => item.id !== this.state.selectedId);
+                            }
                         }
+                        this.setState({
+                            contents: contents,
+                            selectedId: 0,
+                            deleteRestoreModalVisible: false,
+                            loading: false
+                        });
                     });
             }
         );
