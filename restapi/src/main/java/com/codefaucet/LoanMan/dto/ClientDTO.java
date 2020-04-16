@@ -3,6 +3,7 @@ package com.codefaucet.LoanMan.dto;
 public class ClientDTO {
 
     private String id;
+    private boolean active;
     private String firstName;
     private String middleName;
     private String lastName;
@@ -10,9 +11,10 @@ public class ClientDTO {
     private String emailAddress;
     private String address;
 
-    public ClientDTO(String id, String firstName, String middleName, String lastName, String contactNumber,
-	    String emailAddress, String address) {
+    public ClientDTO(String id, boolean active, String firstName, String middleName, String lastName,
+	    String contactNumber, String emailAddress, String address) {
 	this.id = id;
+	this.active = active;
 	this.firstName = firstName;
 	this.middleName = middleName;
 	this.lastName = lastName;
@@ -20,9 +22,14 @@ public class ClientDTO {
 	this.emailAddress = emailAddress;
 	this.address = address;
     }
+    
+    public ClientDTO(String firstName, String middleName, String lastName, String contactNumber, String emailAddress,
+	    String address) {
+	this("", true, firstName, middleName, lastName, contactNumber, emailAddress, address);
+    }
 
     public ClientDTO() {
-	this("", "", "", "", "", "", "");
+	this("", "", "", "", "", "");
     }
 
     public String getId() {
@@ -31,6 +38,14 @@ public class ClientDTO {
 
     public void setId(String id) {
 	this.id = id;
+    }
+
+    public boolean isActive() {
+	return active;
+    }
+
+    public void setActive(boolean active) {
+	this.active = active;
     }
 
     public String getFirstName() {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.codefaucet.LoanMan.common.PagedSearchRequest;
@@ -22,7 +21,7 @@ public class ClientService {
     }
 
     public List<Client> search(PagedSearchRequest param) {
-	Sort sort = Sort.by(Order.asc("lastName"));
+	Sort sort = param.createSorter();
 	return clientRepository.search(param.getQueryString(), param.createStatusFilter(), param.createPageable(sort));
     }
 
@@ -41,6 +40,30 @@ public class ClientService {
     public void deleteById(String id) {
 	Client client = clientRepository.findById(id).get();
 	clientRepository.delete(client);
+    }
+
+    public void delete(String clientId) {
+	Client client = clientRepository.findById(clientId).get();
+	if (client.isActive()) {
+	    client.setActive(false);
+	    clientRepository.save(client);
+	}
+    }
+    
+    public void restore(String clientId) {
+	Client client = clientRepository.findById(clientId).get();
+	if (!client.isActive()) {
+	    client.setActive(true);
+	    clientRepository.save(client);
+	}
+    }
+
+    public Client create(Client client) {
+	return clientRepository.save(client);
+    }
+    
+    public Client edit(Client client) {
+	return clientRepository.save(client);
     }
     
 }

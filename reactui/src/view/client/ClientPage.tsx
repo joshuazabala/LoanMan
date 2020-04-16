@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
     Button,
+    ButtonProps,
     Container,
     Form,
     FormInput,
@@ -12,10 +13,6 @@ import {
     Icon,
     InputOnChangeData,
     Loader,
-    Modal,
-    ModalActions,
-    ModalContent,
-    ModalHeader,
     Pagination,
     PaginationProps,
     Table,
@@ -27,28 +24,31 @@ import {
     TableRow,
 } from 'semantic-ui-react';
 
+import { EnumCommonAction } from '../../common/EnumCommonAction';
 import { EnumResponseStatus } from '../../common/EnumResponseStatus';
 import IPageState from '../../common/IPageState';
 import PagedSearchRequest from '../../common/PagedSearchRequest';
 import PagedSearchResponse from '../../common/PagedSearchResponse';
 import PageStat from '../../common/PageStat';
-import { fetchPost } from '../../common/Request';
-import RequestContainer from '../../common/RequestContainer';
+import { fetchGet, fetchGetNoReturn, fetchPost } from '../../common/Request';
 import ResponseContainer from '../../common/ResponseContainer';
 import Util from '../../common/Util';
 import Client from '../../model/Client';
+import DeleteRestoreDialog from '../common/DeleteRestoreDialog';
+import FilterDialog from '../common/FilterDialog';
 import ClientForm from './ClientForm';
 
 interface IState extends IPageState<Client> {
-    deleteModalVisible: boolean,
-    selectedClientNumber: string
+    deleteRestoreModalVisible: boolean,
+    selectedClientNumber: string,
+    filterDialogVisible: boolean
 }
 
 export default class ClientPage extends React.Component {
 
     public state: IState = {
         contents: new Array<Client>(),
-        deleteModalVisible: false,
+        deleteRestoreModalVisible: false,
         formVisible: false,
         initialized: false,
         loading: false,
@@ -56,13 +56,18 @@ export default class ClientPage extends React.Component {
         pageStat: new PageStat(),
         queryString: "",
         selectedId: 0,
-        selectedClientNumber: ""
+        selectedClientNumber: "",
+        filterDialogVisible: false
     }
 
     private formRef = React.createRef<ClientForm>();
+    private deleteRestoreDialogRef = React.createRef<DeleteRestoreDialog>();
+    private filterDialogRef = React.createRef<FilterDialog>();
 
     public componentDidMount() {
         if (!this.state.initialized) {
+            const pageStat = this.state.pageStat;
+            pageStat.columnSorting.set("name", "ascending");
             this.setState(
                 { initialized: true },
                 () => {
@@ -73,6 +78,10 @@ export default class ClientPage extends React.Component {
     }
 
     public render() {
+        let selectedActive = true;
+        if (!Util.isBlankOrNullString(this.state.selectedClientNumber)) {
+            selectedActive = this.state.contents.filter(item => item.id === this.state.selectedClientNumber)[0].active;
+        }
         return (
             <Container fluid={true}>
                 <Grid>
@@ -85,29 +94,53 @@ export default class ClientPage extends React.Component {
                         <GridColumn width={8}>
                             <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
                             <Button icon="edit" primary={true} content="Edit" disabled={this.state.loading || Util.isBlankOrNullString(this.state.selectedClientNumber)} onClick={this.onEdit} />
-                            <Button icon="trash" negative={true} content="Delete" disabled={this.state.loading || Util.isBlankOrNullString(this.state.selectedClientNumber)} onClick={this.onDelete} />
+                            {
+                                selectedActive &&
+                                <Button
+                                    icon="trash"
+                                    negative={true}
+                                    content="Delete"
+                                    disabled={this.state.loading || Util.isBlankOrNullString(this.state.selectedClientNumber)}
+                                    action={EnumCommonAction.DELETE}
+                                    onClick={this.onDeleteOrRestore}
+                                />
+                            }
+                            {
+                                !selectedActive &&
+                                <Button
+                                    icon="undo"
+                                    positive={true}
+                                    content="Restore"
+                                    disabled={this.state.loading ||  Util.isBlankOrNullString(this.state.selectedClientNumber)}
+                                    action={EnumCommonAction.RESTORE}
+                                    onClick={this.onDeleteOrRestore}
+                                />
+                            }
                         </GridColumn>
                         <GridColumn textAlign="right">
                             <Form onSubmit={this.onFormSubmit}>
                                 <FormInput
                                     disabled={this.state.loading}
                                     placeholder="Search"
-                                    action={{ icon: "search", content: "Search", primary: true }}
                                     value={this.state.queryString}
                                     onChange={this.onQueryStringChanged}
-                                />
+                                >
+                                    <input style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }} />
+                                    <Button icon="search" content="Search" primary={true} style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }} />
+                                    <Button icon="cog" type="button" onClick={this.showFilterDialog} />
+                                </FormInput>
                             </Form>
                         </GridColumn>
                     </GridRow>
                     <GridRow style={{ paddingBottom: 40, paddingTop: 2 }}>
                         <GridColumn>
-                            <Table celled={true} striped={true} selectable={true}>
+                            <Table celled={true} striped={true} selectable={true} sortable={true}>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHeaderCell width={2}>Client No.</TableHeaderCell>
-                                        <TableHeaderCell width={4}>Name</TableHeaderCell>
-                                        <TableHeaderCell width={2}>Contact No.</TableHeaderCell>
-                                        <TableHeaderCell width={3}>Email Address</TableHeaderCell>
+                                        <TableHeaderCell width={4} data-columnname="name" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("name")}>Name</TableHeaderCell>
+                                        <TableHeaderCell width={2} data-columnname="id" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("id")}>Client No.</TableHeaderCell>
+                                        <TableHeaderCell width={2} data-columnname="contactNumber" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("contactNumber")}>Contact No.</TableHeaderCell>
+                                        <TableHeaderCell width={3} data-columnname="emailAddress" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("emailAddress")}>Email Address</TableHeaderCell>
                                         <TableHeaderCell width={5}>Address</TableHeaderCell>
                                     </TableRow>
                                 </TableHeader>
@@ -115,9 +148,9 @@ export default class ClientPage extends React.Component {
                                     {
                                         this.state.contents.map((item, index) => {
                                             return (
-                                                <TableRow key={index} data-id={item.id} onClick={this.onRowClick} active={this.state.selectedClientNumber === item.id}>
-                                                    <TableCell>{item.id}</TableCell>
+                                                <TableRow key={index} data-id={item.id} onClick={this.onRowClick} active={this.state.selectedClientNumber === item.id} negative={!item.active}>
                                                     <TableCell>{item.lastName + ", " + item.firstName + (Util.isBlankOrNullString(item.middleName) ? "" : " " + item.middleName)}</TableCell>
+                                                    <TableCell>{item.id}</TableCell>
                                                     <TableCell>{item.contactNumber}</TableCell>
                                                     <TableCell>{item.emailAddress}</TableCell>
                                                     <TableCell>{item.address}</TableCell>
@@ -155,24 +188,23 @@ export default class ClientPage extends React.Component {
                         onSaved={this.onFormSaved}
                     />
 
-                    <Modal open={this.state.deleteModalVisible} size="small">
-                        <ModalHeader>Confirm Action</ModalHeader>
-                        <ModalContent>Delete selected client?</ModalContent>
-                        <ModalActions>
-                            <Button
-                                negative={true}
-                                content="Delete"
-                                onClick={this.delete}
-                                disabled={this.state.loading}
-                            />
-                            <Button
-                                content="Cancel"
-                                onClick={this.onCancelDelete}
-                                disabled={this.state.loading}
-                            />
-                        </ModalActions>
-                        <Loader active={this.state.loading} />
-                    </Modal>
+                    <DeleteRestoreDialog
+                        onCancel={this.onCancelDeleteOrRestore}
+                        onDelete={this.onDelete}
+                        onRestore={this.onRestore}
+                        open={this.state.deleteRestoreModalVisible}
+                        size="small"
+                        ref={this.deleteRestoreDialogRef}
+                    />
+
+                    <FilterDialog
+                        onClose={this.onFilterDialogClose}
+                        onReset={this.onFilterDialogReset}
+                        onSaveAndSearch={this.onFilterDialogSaveAndSearch}
+                        open={this.state.filterDialogVisible}
+                        ref={this.filterDialogRef}
+                        size="small"
+                    />
 
                 </Grid>
             </Container>
@@ -204,7 +236,7 @@ export default class ClientPage extends React.Component {
         const pageStat = this.state.pageStat;
         pageStat.currentPage = data.activePage as number;
         this.setState(
-            { pageStat },
+            { pageStat, selectedClientNumber: "" },
             () => {
                 this.search();
             }
@@ -213,10 +245,19 @@ export default class ClientPage extends React.Component {
 
     private search = () => {
         const requestParam = new PagedSearchRequest();
-        requestParam.includeInactive = false;
+        requestParam.includeInactive = this.state.pageStat.showInactive;
         requestParam.pageNumber = this.state.pageStat.currentPage;
         requestParam.pageSize = this.state.pageStat.pageSize;
         requestParam.queryString = this.state.queryString;
+        const columnSorting = this.state.pageStat.columnSorting;
+        if (columnSorting.has("name")) {
+            const order = columnSorting.get("name");
+            columnSorting.delete("name");
+            columnSorting.set("lastName", order);
+            columnSorting.set("firstName", order);
+            columnSorting.set("middleName", order);
+        }
+        requestParam.columnSorting = Util.columnSortingMapToObject(columnSorting);
 
         this.setState(
             {
@@ -228,6 +269,14 @@ export default class ClientPage extends React.Component {
                         if (result.status === EnumResponseStatus.SUCCESSFUL) {
                             const pageStat = this.state.pageStat;
                             pageStat.totalPageCount = result.totalPageCount;
+                            pageStat.columnSorting = Util.objectToColumnSortingMap(result.columnSorting);
+                            if (pageStat.columnSorting.has("lastName")) {
+                                const order = pageStat.columnSorting.get("lastName");
+                                pageStat.columnSorting.delete("lastName");
+                                pageStat.columnSorting.delete("firstName");
+                                pageStat.columnSorting.delete("middleName");
+                                pageStat.columnSorting.set("name", order);
+                            }
                             this.setState({
                                 contents: result.content,
                                 loading: false,
@@ -247,9 +296,7 @@ export default class ClientPage extends React.Component {
     }
 
     private showForm = (id: string) => {
-        const requestParam = { id };
-
-        fetchPost<{ id: string }, Client>("/client/findById", requestParam)
+        fetchGet<Client>("/client/findById/" + id)
             .then(item => {
                 this.setState(
                     { formVisible: true },
@@ -269,10 +316,8 @@ export default class ClientPage extends React.Component {
             { loading: true },
             () => {
                 const content = this.formRef.current!.state.content;
-                const requestParam = new RequestContainer<Client>();
-                requestParam.content = content;
-
-                fetchPost<RequestContainer<Client>, ResponseContainer<Client>>("/client/save", requestParam)
+                const url = "/client/" + (Util.isBlankOrNullString(content.id) ? "create" : "edit");
+                fetchPost<Client, ResponseContainer<Client>>(url, content)
                     .then(response => {
                         this.formRef.current!.setState(
                             { loading: false },
@@ -317,34 +362,111 @@ export default class ClientPage extends React.Component {
     }
 
     private onDelete = () => {
-        this.setState({ deleteModalVisible: true });
+        const id = this.deleteRestoreDialogRef.current!.state.id;
+        this.deleteOrRestore(EnumCommonAction.DELETE, id as string);
     }
 
-    private onCancelDelete = () => {
-        this.setState({ deleteModalVisible: false });
+    private onDeleteOrRestore = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: ButtonProps) => {
+        const action = data.action as EnumCommonAction;
+        this.setState(
+            { deleteRestoreModalVisible: true },
+            () => {
+                this.deleteRestoreDialogRef.current!.setState({
+                    header: "Confirm Action",
+                    id: this.state.selectedClientNumber,
+                    message: (action === EnumCommonAction.RESTORE ? "Restore " : "Delete ") + "selected client?",
+                    mode: action === EnumCommonAction.RESTORE ? EnumCommonAction.RESTORE : EnumCommonAction.DELETE
+                });
+            }
+        );
     }
 
-    private delete = () => {
-        const requestParam = new RequestContainer<string>();
-        requestParam.content = this.state.selectedClientNumber;
+    private showFilterDialog = () => {
+        const pageStat = this.state.pageStat;
+        this.setState(
+            { filterDialogVisible: true },
+            () => {
+                this.filterDialogRef.current!.setState({
+                    itemsPerPage: pageStat.pageSize,
+                    showInactive: pageStat.showInactive
+                });
+            }
+        );
+    }
 
+    private onColumnSort = (event: any) => {
+        const columnname = event.currentTarget.getAttribute("data-columnname") as string;
+        const pageStat = this.state.pageStat;
+        const currentOrder = pageStat.columnSorting.get(columnname);
+        const newOrder = currentOrder === undefined ? "ascending" : currentOrder === "ascending" ? "descending" : currentOrder === "descending" ? undefined : undefined;
+        pageStat.columnSorting.set(columnname, newOrder);
+        pageStat.currentPage = 1;
+        this.setState(
+            { pageStat, selectedId: 0 },
+            () => {
+                this.search();
+            }
+        );
+    }
+
+    private onCancelDeleteOrRestore = () => {
+        this.setState({ deleteRestoreModalVisible: false });
+    }
+
+    private onRestore = () => {
+        const id = this.deleteRestoreDialogRef.current!.state.id;
+        this.deleteOrRestore(EnumCommonAction.RESTORE, id as string);
+    }
+
+    private onFilterDialogClose = () => {
+        this.setState({ filterDialogVisible: false });
+    }
+
+    private onFilterDialogReset = () => {
+        this.filterDialogRef.current!.setState({
+            itemsPerPage: 20,
+            showInactive: false
+        });
+    }
+
+    private onFilterDialogSaveAndSearch = () => {
+        const filterState = this.filterDialogRef.current!.state;
+        const pageStat = this.state.pageStat;
+        pageStat.pageSize = filterState.itemsPerPage;
+        pageStat.showInactive = filterState.showInactive;
+        pageStat.currentPage = 1;
+        this.setState(
+            { pageStat, filterDialogVisible: false },
+            () => {
+                this.search();
+            }
+        );
+    }
+
+    private deleteOrRestore = (mode: EnumCommonAction.DELETE | EnumCommonAction.RESTORE, id: string) => {
+        const url = "/client/" + (mode === EnumCommonAction.RESTORE ? "restore" : "delete") + "/" + id;
         this.setState(
             { loading: true },
             () => {
-                fetchPost<RequestContainer<string>, ResponseContainer<boolean>>("/client/delete", requestParam)
-                    .then(response => {
-                        if (response.status === EnumResponseStatus.SUCCESSFUL) {
-                            let contents = this.state.contents;
-                            contents = contents.filter(item => item.id !== this.state.selectedClientNumber);
-                            this.setState({
-                                contents: contents,
-                                selectedId: 0,
-                                deleteModalVisible: false,
-                                loading: false
-                            });
+                fetchGetNoReturn(url)
+                    .then(() => {
+                        let contents = this.state.contents;
+                        if (mode === EnumCommonAction.RESTORE) {
+                            const index = contents.findIndex(item => item.id === id);
+                            contents[index].active = true;
                         } else {
-                            alert("Error: " + response.message);
+                            if (this.state.pageStat.showInactive) {
+                                contents.find(item => item.id === id)!.active = false;
+                            } else {
+                                contents = contents.filter(item => item.id !== this.state.selectedClientNumber);
+                            }
                         }
+                        this.setState({
+                            contents: contents,
+                            selectedId: 0,
+                            deleteRestoreModalVisible: false,
+                            loading: false
+                        });
                     });
             }
         );

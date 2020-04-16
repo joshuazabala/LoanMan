@@ -13,6 +13,7 @@ import {
     ModalContent,
     ModalHeader,
     TextAreaProps,
+    FormGroup,
 } from 'semantic-ui-react';
 
 import IFormProps from '../../common/IFormProps';
@@ -21,7 +22,7 @@ import Util from '../../common/Util';
 import Client from '../../model/Client';
 
 interface IState extends IFormState<Client> {
-    
+
 }
 
 export default class ClientForm extends React.Component<IFormProps, IState> {
@@ -39,7 +40,7 @@ export default class ClientForm extends React.Component<IFormProps, IState> {
                 <ModalHeader>{(Util.isBlankOrNullString(this.state.content.id) ? "New" : "Update") + " Client"}</ModalHeader>
                 <ModalContent>
                     <Form onSubmit={this.onSubmit}>
-                        <FormInput 
+                        <FormInput
                             label="First Name"
                             value={this.state.content.firstName}
                             disabled={this.state.loading}
@@ -48,7 +49,7 @@ export default class ClientForm extends React.Component<IFormProps, IState> {
                             error={this.state.errorMap.get("firstName")}
                             maxLength={32}
                         />
-                        <FormInput 
+                        <FormInput
                             label="Middle Name"
                             value={this.state.content.middleName}
                             disabled={this.state.loading}
@@ -56,7 +57,7 @@ export default class ClientForm extends React.Component<IFormProps, IState> {
                             onChange={this.onInputChange}
                             maxLength={32}
                         />
-                        <FormInput 
+                        <FormInput
                             label="Last Name"
                             value={this.state.content.lastName}
                             disabled={this.state.loading}
@@ -65,24 +66,26 @@ export default class ClientForm extends React.Component<IFormProps, IState> {
                             error={this.state.errorMap.get("lastName")}
                             maxLength={32}
                         />
-                        <FormInput 
-                            label="Contact No."
-                            value={this.state.content.contactNumber}
-                            disabled={this.state.loading}
-                            fieldname="contactNumber"
-                            onChange={this.onInputChange}
-                            error={this.state.errorMap.get("contactNumber")}
-                            maxLength={64}
-                        />
-                        <FormInput 
-                            label="Email Address"
-                            value={this.state.content.emailAddress}
-                            disabled={this.state.loading}
-                            fieldname="emailAddress"
-                            onChange={this.onInputChange}
-                            maxLength={128}
-                        />
-                        <FormTextArea 
+                        <FormGroup widths="equal">
+                            <FormInput
+                                label="Contact No."
+                                value={this.state.content.contactNumber}
+                                disabled={this.state.loading}
+                                fieldname="contactNumber"
+                                onChange={this.onInputChange}
+                                error={this.state.errorMap.get("contactNumber")}
+                                maxLength={64}
+                            />
+                            <FormInput
+                                label="Email Address"
+                                value={this.state.content.emailAddress}
+                                disabled={this.state.loading}
+                                fieldname="emailAddress"
+                                onChange={this.onInputChange}
+                                maxLength={128}
+                            />
+                        </FormGroup>
+                        <FormTextArea
                             label="Address"
                             value={this.state.content.address}
                             disabled={this.state.loading}

@@ -57,13 +57,13 @@ public class Client {
     @OneToMany(mappedBy = "client")
     private List<Loan> loans;
 
-    public Client(String id, boolean active, String lastName, String firstName, String middleName, String contactNumber,
+    public Client(String id, boolean active, String firstName, String middleName, String lastName, String contactNumber,
 	    String emailAddress, String address) {
 	this.id = id;
 	this.active = active;
-	this.lastName = lastName;
 	this.firstName = firstName;
 	this.middleName = middleName;
+	this.lastName = lastName;
 	this.contactNumber = contactNumber;
 	this.emailAddress = emailAddress;
 	this.address = address;
@@ -72,13 +72,13 @@ public class Client {
 	loans = new ArrayList<Loan>();
     }
 
-    public Client(String clientNumber, String lastName, String firstName, String middleName, String contactNumber,
-	    String emailAddress, String address) {
-	this("", true, lastName, firstName, middleName, contactNumber, emailAddress, address);
+    public Client(String firstName, String middleName, String lastName, String contactNumber, String emailAddress,
+	    String address) {
+	this("", true, firstName, middleName, lastName, contactNumber, emailAddress, address);
     }
 
     public Client() {
-	this("", "", "", "", "", "", "");
+	this("", "", "", "", "", "");
     }
 
     public String getName() {

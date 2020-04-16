@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.codefaucet.LoanMan.common.EnumLoanStatus;
@@ -20,17 +19,14 @@ public class LoanService {
     private ILoanRepository loanRepository;
     
     public List<Loan> search(PagedSearchRequest param) {
-	Sort sort = Sort.by(Order.desc("loanDate"), Order.asc("client.lastName"), Order.asc("client.firstName"));
-	
+	Sort sort = param.createSorter();
 	List<EnumLoanStatus> loanStatusFilter = new ArrayList<EnumLoanStatus>();
 	String loanStatusFilterString = (String) param.getOtherData().get("loanStatuses");
 	for (String loanStatusString : loanStatusFilterString.split(",")) {
 	    EnumLoanStatus loanStatus = EnumLoanStatus.valueOf(loanStatusString);
 	    loanStatusFilter.add(loanStatus);
 	}
-	
 	int loanTypeId = (int) param.getOtherData().get("loanTypeId");
-	
 	return loanRepository.search(param.getQueryString(), loanTypeId, loanStatusFilter, param.createPageable(sort));
     }
 
@@ -62,6 +58,11 @@ public class LoanService {
     public void delete(long id) {
 	Loan loan = loanRepository.findById(id).get();
 	loanRepository.delete(loan);
+    }
+
+    public void restore(long loanId) {
+	// TODO Auto-generated method stub
+	
     }
     
 }

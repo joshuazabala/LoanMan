@@ -152,6 +152,8 @@ public class UserController {
 		item.getContactNumber(), 
 		item.getEmailAddress()
 		);
+	dto.setProfile(item.getProfile().getName());
+	dto.setProfileId(item.getProfile().getId());
 	return response.successful(dto);
     }
     
@@ -229,6 +231,8 @@ public class UserController {
 		user.getContactNumber(), 
 		user.getEmailAddress()
 		);
+	dto.setProfile(user.getProfile().getName());
+	dto.setProfileId(user.getProfile().getId());
 	return response.successful(dto);
     }
     

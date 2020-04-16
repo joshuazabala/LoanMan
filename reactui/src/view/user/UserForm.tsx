@@ -15,6 +15,7 @@ import {
     ModalActions,
     ModalContent,
     ModalHeader,
+    FormGroup,
 } from 'semantic-ui-react';
 
 import IFormProps from '../../common/IFormProps';
@@ -57,15 +58,6 @@ export default class UserForm extends React.Component<IFormProps, IState> {
                 <ModalHeader>{(this.state.content.id === 0 ? "New" : "Update") + " User"}</ModalHeader>
                 <ModalContent>
                     <Form onSubmit={this.onSubmit}>
-                        <FormInput
-                            label="Username"
-                            value={this.state.content.username}
-                            disabled={this.state.loading}
-                            fieldname="username"
-                            onChange={this.onInputChange}
-                            error={this.state.errorMap.get("username")}
-                            maxLength={32}
-                        />
                         <FormDropdown
                             fluid={true}
                             label="Profile"
@@ -78,6 +70,15 @@ export default class UserForm extends React.Component<IFormProps, IState> {
                             onClick={this.onProfileSearchClick}
                             disabled={this.state.loading}
                             error={this.state.errorMap.get("profileId")}
+                        />
+                        <FormInput
+                            label="Username"
+                            value={this.state.content.username}
+                            disabled={this.state.loading}
+                            fieldname="username"
+                            onChange={this.onInputChange}
+                            error={this.state.errorMap.get("username")}
+                            maxLength={32}
                         />
                         <FormInput
                             label="First Name"
@@ -105,24 +106,26 @@ export default class UserForm extends React.Component<IFormProps, IState> {
                             error={this.state.errorMap.get("lastName")}
                             maxLength={32}
                         />
-                        <FormInput
-                            label="Contact No."
-                            value={this.state.content.contactNumber}
-                            disabled={this.state.loading}
-                            fieldname="contactNumber"
-                            onChange={this.onInputChange}
-                            error={this.state.errorMap.get("contactNumber")}
-                            maxLength={64}
-                        />
-                        <FormInput
-                            label="Email Address"
-                            value={this.state.content.emailAddress}
-                            disabled={this.state.loading}
-                            fieldname="emailAddress"
-                            onChange={this.onInputChange}
-                            error={this.state.errorMap.get("contactNumber")}
-                            maxLength={64}
-                        />
+                        <FormGroup widths="equal">
+                            <FormInput
+                                label="Contact No."
+                                value={this.state.content.contactNumber}
+                                disabled={this.state.loading}
+                                fieldname="contactNumber"
+                                onChange={this.onInputChange}
+                                error={this.state.errorMap.get("contactNumber")}
+                                maxLength={64}
+                            />
+                            <FormInput
+                                label="Email Address"
+                                value={this.state.content.emailAddress}
+                                disabled={this.state.loading}
+                                fieldname="emailAddress"
+                                onChange={this.onInputChange}
+                                error={this.state.errorMap.get("contactNumber")}
+                                maxLength={64}
+                            />
+                        </FormGroup>
                         {
                             !Util.isBlankOrNullString(this.state.errorMessage) &&
                             <Message error={true}>

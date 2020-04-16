@@ -17,7 +17,6 @@ import com.codefaucet.LoanMan.common.PagedSearchRequest;
 import com.codefaucet.LoanMan.common.PagedSearchResponse;
 import com.codefaucet.LoanMan.common.ResponseContainer;
 import com.codefaucet.LoanMan.common.StringHelper;
-import com.codefaucet.LoanMan.common.StringHelper.CharSet;
 import com.codefaucet.LoanMan.common.Util;
 import com.codefaucet.LoanMan.dto.LoanTypeDTO;
 import com.codefaucet.LoanMan.model.LoanType;

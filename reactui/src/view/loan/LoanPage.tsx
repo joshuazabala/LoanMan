@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
     Button,
+    ButtonProps,
     Container,
     Dropdown,
     DropdownItemProps,
@@ -16,10 +17,6 @@ import {
     Icon,
     InputOnChangeData,
     Loader,
-    Modal,
-    ModalActions,
-    ModalContent,
-    ModalHeader,
     Pagination,
     PaginationProps,
     Table,
@@ -31,24 +28,27 @@ import {
     TableRow,
 } from 'semantic-ui-react';
 
+import { EnumCommonAction } from '../../common/EnumCommonAction';
 import { EnumLoanStatus } from '../../common/EnumLoanStatus';
 import { EnumResponseStatus } from '../../common/EnumResponseStatus';
 import IPageState from '../../common/IPageState';
 import PagedSearchRequest from '../../common/PagedSearchRequest';
 import PagedSearchResponse from '../../common/PagedSearchResponse';
 import PageStat from '../../common/PageStat';
-import { fetchPost } from '../../common/Request';
-import RequestContainer from '../../common/RequestContainer';
+import { fetchGet, fetchGetNoReturn, fetchPost } from '../../common/Request';
 import ResponseContainer from '../../common/ResponseContainer';
 import Util from '../../common/Util';
 import Loan from '../../model/Loan';
 import LoanType from '../../model/LoanType';
+import DeleteRestoreDialog from '../common/DeleteRestoreDialog';
+import FilterDialog from '../common/FilterDialog';
 import LoanForm from './LoanForm';
 
 interface IState extends IPageState<Loan> {
     loanTypes: DropdownItemProps[],
     selectedLoanTypeId: number,
-    deleteModalVisible: boolean
+    deleteRestoreModalVisible: boolean,
+    filterDialogVisible: boolean
 }
 
 export default class LoanPage extends React.Component<any, IState> {
@@ -64,17 +64,22 @@ export default class LoanPage extends React.Component<any, IState> {
         selectedId: 0,
         loanTypes: new Array<DropdownItemProps>(),
         selectedLoanTypeId: 0,
-        deleteModalVisible: false
+        deleteRestoreModalVisible: false,
+        filterDialogVisible: false
     }
 
     private formRef = React.createRef<LoanForm>();
     private loanTypeSearchTimeout: number = 0;
+    private deleteRestoreDialogRef = React.createRef<DeleteRestoreDialog>();
+    private filterDialogRef = React.createRef<FilterDialog>();
 
     public componentDidMount() {
         if (!this.state.initialized) {
+            const pageStat = this.state.pageStat;
+            pageStat.columnSorting.set("loanDate", "descending");
             const loanTypes = [{ key: 0, value: 0, text: "All Types" }];
             this.setState(
-                { initialized: true, loanTypes },
+                { initialized: true, loanTypes, pageStat },
                 () => {
                     this.search();
                 }
@@ -83,6 +88,10 @@ export default class LoanPage extends React.Component<any, IState> {
     }
 
     public render() {
+        let selectedActive = true;
+        if (this.state.selectedId !== 0) {
+            selectedActive = this.state.contents.filter(item => item.id === this.state.selectedId)[0].status === EnumLoanStatus.ACTIVE;
+        }
         return (
             <Container fluid={true}>
                 <Grid>
@@ -95,7 +104,28 @@ export default class LoanPage extends React.Component<any, IState> {
                         <GridColumn width={6}>
                             <Button icon="add" primary={true} content="New" disabled={this.state.loading} onClick={this.onAdd} />
                             <Button icon="edit" primary={true} content="Edit" disabled={this.state.loading || this.state.selectedId === 0} onClick={this.onEdit} />
-                            <Button icon="trash" negative={true} content="Delete" disabled={this.state.loading || this.state.selectedId === 0} onClick={this.onDelete} />
+                            {
+                                selectedActive &&
+                                <Button
+                                    icon="trash"
+                                    negative={true}
+                                    content="Delete"
+                                    disabled={this.state.loading || this.state.selectedId === 0}
+                                    action={EnumCommonAction.DELETE}
+                                    onClick={this.onDeleteOrRestore}
+                                />
+                            }
+                            {
+                                !selectedActive &&
+                                <Button
+                                    icon="undo"
+                                    positive={true}
+                                    content="Restore"
+                                    disabled={this.state.loading || this.state.selectedId === 0}
+                                    action={EnumCommonAction.RESTORE}
+                                    onClick={this.onDeleteOrRestore}
+                                />
+                            }
                         </GridColumn>
                         <GridColumn width={5}>
                             <Dropdown
@@ -115,21 +145,24 @@ export default class LoanPage extends React.Component<any, IState> {
                                 <FormInput
                                     disabled={this.state.loading}
                                     placeholder="Search"
-                                    action={{ icon: "search", content: "Search", primary: true }}
                                     value={this.state.queryString}
                                     onChange={this.onQueryStringChanged}
-                                />
+                                >
+                                    <input style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }} />
+                                    <Button icon="search" content="Search" primary={true} style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }} />
+                                    <Button icon="cog" type="button" onClick={this.showFilterDialog} />
+                                </FormInput>
                             </Form>
                         </GridColumn>
                     </GridRow>
                     <GridRow style={{ paddingBottom: 40, paddingTop: 2 }}>
                         <GridColumn>
-                            <Table celled={true} striped={true} selectable={true}>
+                            <Table celled={true} striped={true} selectable={true} sortable={true}>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHeaderCell width={2}>Loan Date</TableHeaderCell>
-                                        <TableHeaderCell width={5}>Client</TableHeaderCell>
-                                        <TableHeaderCell width={4}>Loan Type</TableHeaderCell>
+                                        <TableHeaderCell width={2} data-columnname="loanDate" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("loanDate")}>Loan Date</TableHeaderCell>
+                                        <TableHeaderCell width={5} data-columnname="client" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("client")}>Client</TableHeaderCell>
+                                        <TableHeaderCell width={4} data-columnname="loanType" onClick={this.onColumnSort} sorted={this.state.pageStat.columnSorting.get("loanType")}>Loan Type</TableHeaderCell>
                                         <TableHeaderCell width={5}>Remarks</TableHeaderCell>
                                     </TableRow>
                                 </TableHeader>
@@ -137,7 +170,7 @@ export default class LoanPage extends React.Component<any, IState> {
                                     {
                                         this.state.contents.map((item, index) => {
                                             return (
-                                                <TableRow key={index} data-id={item.id} onClick={this.onRowClick} active={this.state.selectedId === item.id}>
+                                                <TableRow key={index} data-id={item.id} onClick={this.onRowClick} active={this.state.selectedId === item.id} negative={item.status === EnumLoanStatus.INACTIVE}>
                                                     <TableCell>{item.loanDate}</TableCell>
                                                     <TableCell>{item.client}</TableCell>
                                                     <TableCell>{item.loanType}</TableCell>
@@ -176,24 +209,23 @@ export default class LoanPage extends React.Component<any, IState> {
                         onSaved={this.onFormSaved}
                     />
 
-                    <Modal open={this.state.deleteModalVisible} size="small">
-                        <ModalHeader>Confirm Action</ModalHeader>
-                        <ModalContent>Delete selected loan?</ModalContent>
-                        <ModalActions>
-                            <Button
-                                negative={true}
-                                content="Delete"
-                                onClick={this.delete}
-                                disabled={this.state.loading}
-                            />
-                            <Button
-                                content="Cancel"
-                                onClick={this.onCancelDelete}
-                                disabled={this.state.loading}
-                            />
-                        </ModalActions>
-                        <Loader active={this.state.loading} />
-                    </Modal>
+                    <DeleteRestoreDialog
+                        onCancel={this.onCancelDeleteOrRestore}
+                        onDelete={this.onDelete}
+                        onRestore={this.onRestore}
+                        open={this.state.deleteRestoreModalVisible}
+                        size="small"
+                        ref={this.deleteRestoreDialogRef}
+                    />
+
+                    <FilterDialog
+                        onClose={this.onFilterDialogClose}
+                        onReset={this.onFilterDialogReset}
+                        onSaveAndSearch={this.onFilterDialogSaveAndSearch}
+                        open={this.state.filterDialogVisible}
+                        ref={this.filterDialogRef}
+                        size="small"
+                    />
 
                 </Grid>
             </Container>
@@ -226,7 +258,7 @@ export default class LoanPage extends React.Component<any, IState> {
         const pageStat = this.state.pageStat;
         pageStat.currentPage = data.activePage as number;
         this.setState(
-            { pageStat },
+            { pageStat, selectedId: 0 },
             () => {
                 this.search();
             }
@@ -235,10 +267,19 @@ export default class LoanPage extends React.Component<any, IState> {
 
     private search = () => {
         const requestParam = new PagedSearchRequest();
-        requestParam.includeInactive = false;
+        requestParam.includeInactive = this.state.pageStat.showInactive;
         requestParam.pageNumber = this.state.pageStat.currentPage;
         requestParam.pageSize = this.state.pageStat.pageSize;
         requestParam.queryString = this.state.queryString;
+        const columnSorting = this.state.pageStat.columnSorting;
+        if (columnSorting.has("client")) {
+            const order = columnSorting.get("client");
+            columnSorting.delete("client");
+            columnSorting.set("client.lastName", order);
+            columnSorting.set("client.firstName", order);
+            columnSorting.set("client.middleName", order);
+        }
+        requestParam.columnSorting = Util.columnSortingMapToObject(this.state.pageStat.columnSorting);
         requestParam.otherData = {
             loanTypeId: this.state.selectedLoanTypeId,
             loanStatuses: [EnumLoanStatus.ACTIVE].join(",")
@@ -253,6 +294,13 @@ export default class LoanPage extends React.Component<any, IState> {
                     .then(result => {
                         if (result.status === EnumResponseStatus.SUCCESSFUL) {
                             const pageStat = this.state.pageStat;
+                            if (pageStat.columnSorting.has("client.lastName")) {
+                                const order = pageStat.columnSorting.get("client.lastName");
+                                pageStat.columnSorting.delete("client.lastName");
+                                pageStat.columnSorting.delete("client.firstName");
+                                pageStat.columnSorting.delete("client.middleName");
+                                pageStat.columnSorting.set("client", order);
+                            }
                             pageStat.totalPageCount = result.totalPageCount;
                             this.setState({
                                 contents: result.content,
@@ -273,9 +321,7 @@ export default class LoanPage extends React.Component<any, IState> {
     }
 
     private showForm = (id: number) => {
-        const requestParam = { id };
-
-        fetchPost<{ id: number }, Loan>("/loan/findById", requestParam)
+        fetchGet<Loan>("/loan/findById/" + id)
             .then(item => {
                 this.setState(
                     { formVisible: true },
@@ -312,10 +358,8 @@ export default class LoanPage extends React.Component<any, IState> {
             { loading: true },
             () => {
                 const content = this.formRef.current!.state.content;
-                const requestParam = new RequestContainer<Loan>();
-                requestParam.content = content;
-
-                fetchPost<RequestContainer<Loan>, ResponseContainer<Loan>>("/loan/save", requestParam)
+                const url = "/loan/" + (content.id === 0 ? "create" : "edit");
+                fetchPost<Loan, ResponseContainer<Loan>>(url, content)
                     .then(response => {
                         this.formRef.current!.setState(
                             { loading: false },
@@ -360,37 +404,8 @@ export default class LoanPage extends React.Component<any, IState> {
     }
 
     private onDelete = () => {
-        this.setState({ deleteModalVisible: true });
-    }
-
-    private onCancelDelete = () => {
-        this.setState({ deleteModalVisible: false });
-    }
-
-    private delete = () => {
-        const requestParam = new RequestContainer<number>();
-        requestParam.content = this.state.selectedId;
-
-        this.setState(
-            { loading: true },
-            () => {
-                fetchPost<RequestContainer<number>, ResponseContainer<boolean>>("/loan/delete", requestParam)
-                    .then(response => {
-                        if (response.status === EnumResponseStatus.SUCCESSFUL) {
-                            let contents = this.state.contents;
-                            contents = contents.filter(item => item.id !== this.state.selectedId);
-                            this.setState({
-                                contents: contents,
-                                selectedId: 0,
-                                deleteModalVisible: false,
-                                loading: false
-                            });
-                        } else {
-                            alert("Error: " + response.message);
-                        }
-                    });
-            }
-        );
+        const id = this.deleteRestoreDialogRef.current!.state.id;
+        this.deleteOrRestore(EnumCommonAction.DELETE, id as number);
     }
 
     private onSelectedLoanTypeChanged = (event: React.SyntheticEvent<HTMLElement, Event>, data: DropdownProps) => {
@@ -430,7 +445,7 @@ export default class LoanPage extends React.Component<any, IState> {
                         loanTypes.push({
                             key: item.id,
                             value: item.id,
-                            text: item.name + " - " + item.description
+                            text: item.name
                         });
                     });
                     this.setState({ loanTypes });
@@ -450,6 +465,112 @@ export default class LoanPage extends React.Component<any, IState> {
         if (node !== undefined) {
             this.getLoanTypes(node.value);
         }
+    }
+
+    private onDeleteOrRestore = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: ButtonProps) => {
+        const action = data.action as EnumCommonAction;
+        this.setState(
+            { deleteRestoreModalVisible: true },
+            () => {
+                this.deleteRestoreDialogRef.current!.setState({
+                    header: "Confirm Action",
+                    id: this.state.selectedId,
+                    message: (action === EnumCommonAction.RESTORE ? "Restore " : "Delete ") + "selected user profile?",
+                    mode: action === EnumCommonAction.RESTORE ? EnumCommonAction.RESTORE : EnumCommonAction.DELETE
+                });
+            }
+        );
+    }
+
+    private showFilterDialog = () => {
+        const pageStat = this.state.pageStat;
+        this.setState(
+            { filterDialogVisible: true },
+            () => {
+                this.filterDialogRef.current!.setState({
+                    itemsPerPage: pageStat.pageSize,
+                    showInactive: pageStat.showInactive
+                });
+            }
+        );
+    }
+
+    private onColumnSort = (event: any) => {
+        const columnname = event.currentTarget.getAttribute("data-columnname") as string;
+        const pageStat = this.state.pageStat;
+        const currentOrder = pageStat.columnSorting.get(columnname);
+        const newOrder = currentOrder === undefined ? "ascending" : currentOrder === "ascending" ? "descending" : currentOrder === "descending" ? undefined : undefined;
+        pageStat.columnSorting.set(columnname, newOrder);
+        pageStat.currentPage = 1;
+        this.setState(
+            { pageStat, selectedId: 0 },
+            () => {
+                this.search();
+            }
+        );
+    }
+
+    private onCancelDeleteOrRestore = () => {
+        this.setState({ deleteRestoreModalVisible: false });
+    }
+
+    private onRestore = () => {
+        const id = this.deleteRestoreDialogRef.current!.state.id;
+        this.deleteOrRestore(EnumCommonAction.RESTORE, id as number);
+    }
+
+    private deleteOrRestore = (mode: EnumCommonAction.DELETE | EnumCommonAction.RESTORE, id: number) => {
+        const url = "/user/" + (mode === EnumCommonAction.RESTORE ? "restore" : "delete") + "/" + id;
+        this.setState(
+            { loading: true },
+            () => {
+                fetchGetNoReturn(url)
+                    .then(() => {
+                        let contents = this.state.contents;
+                        const index = contents.findIndex(item => item.id === id);
+                        if (mode === EnumCommonAction.RESTORE) {
+                            contents[index].status = EnumLoanStatus.ACTIVE;
+                        } else {
+                            if (this.state.pageStat.showInactive) {
+                                contents[index].status = EnumLoanStatus.INACTIVE;
+                            } else {
+                                contents = contents.filter(item => item.id !== this.state.selectedId);
+                            }
+                        }
+                        this.setState({
+                            contents: contents,
+                            selectedId: 0,
+                            deleteRestoreModalVisible: false,
+                            loading: false
+                        });
+                    });
+            }
+        );
+    }
+
+    private onFilterDialogClose = () => {
+        this.setState({ filterDialogVisible: false });
+    }
+
+    private onFilterDialogReset = () => {
+        this.filterDialogRef.current!.setState({
+            itemsPerPage: 20,
+            showInactive: false
+        });
+    }
+
+    private onFilterDialogSaveAndSearch = () => {
+        const filterState = this.filterDialogRef.current!.state;
+        const pageStat = this.state.pageStat;
+        pageStat.pageSize = filterState.itemsPerPage;
+        pageStat.showInactive = filterState.showInactive;
+        pageStat.currentPage = 1;
+        this.setState(
+            { pageStat, filterDialogVisible: false, selectedId: 0 },
+            () => {
+                this.search();
+            }
+        );
     }
 
 }
