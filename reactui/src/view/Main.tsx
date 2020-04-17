@@ -33,7 +33,7 @@ class Main extends React.Component<RouteComponentProps, any> {
                             <MenuItem content="Clients" targetpath="/client" onClick={this.onNavigate} active={this.isCurrentPath("/client")} />
                             <MenuItem content="Loans" targetpath="/loan" onClick={this.onNavigate} active={this.isCurrentPath("/loan")} />
                             <MenuItem content="Loan Types" targetpath="/loantype" onClick={this.onNavigate} active={this.isCurrentPath("/loantype")} />
-                            <MenuItem content="Groups" targetpath="/group" onClick={this.onNavigate} active={this.isCurrentPath("/cutoff")} />
+                            <MenuItem content="Groups" targetpath="/group" onClick={this.onNavigate} active={this.isCurrentPath("/group")} />
                             <MenuItem content="Group Types" targetpath="/grouptype" onClick={this.onNavigate} active={this.isCurrentPath("/grouptype")} />
                             <MenuItem content="Users" targetpath="/user" onClick={this.onNavigate} active={this.isCurrentPath("/user")} />
                             <MenuItem content="User Profiles" targetpath="/userprofile" onClick={this.onNavigate} active={this.isCurrentPath("/userprofile")} />

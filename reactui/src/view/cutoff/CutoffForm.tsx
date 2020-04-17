@@ -9,12 +9,14 @@ import {
     FormGroup,
     FormInput,
     FormProps,
+    FormTextArea,
     InputOnChangeData,
     Message,
     Modal,
     ModalActions,
     ModalContent,
     ModalHeader,
+    TextAreaProps,
 } from 'semantic-ui-react';
 
 import { EnumCutoffFrequency } from '../../common/EnumCutoffFrequency';
@@ -126,6 +128,12 @@ export default class CutoffForm extends React.Component<IFormProps, IFormState<C
                                 onChange={this.onDateChange}
                             />
                         </FormGroup>
+                        <FormTextArea 
+                            label="Remarks"
+                            value={this.state.content.remarks}
+                            disabled={this.state.loading}
+                            onChange={this.onRemarksChange}
+                        />
                         {
                             !Util.isBlankOrNullString(this.state.errorMessage) &&
                             <Message error={true}>
@@ -228,6 +236,12 @@ export default class CutoffForm extends React.Component<IFormProps, IFormState<C
         } else {
             content.endDate = data.value;
         }
+        this.setState({ content });
+    }
+
+    private onRemarksChange = (event: React.FormEvent<HTMLTextAreaElement>, data: TextAreaProps) => {
+        const content = this.state.content;
+        content.remarks = data.value as string;
         this.setState({ content });
     }
 

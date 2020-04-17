@@ -14,19 +14,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.codefaucet.LoanMan.common.EnumCutoffFrequency;
 import com.codefaucet.LoanMan.common.EnumCutoffStatus;
 
 @Entity
-@Table(name = "cutoffs", uniqueConstraints = @UniqueConstraint(columnNames = { "frequency", "year", "month",
-	"cutoff_number" }))
+@Table(name = "cutoffs")
 public class Cutoff {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(columnDefinition = "tinyint(1) not null default 1")
+    private boolean active;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(16) not null default 'DRAFT'")
@@ -57,28 +58,34 @@ public class Cutoff {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "cutoff")
     private List<Penalty> penalties;
 
-    public Cutoff() {
-	this(EnumCutoffStatus.DRAFT, LocalDate.now(), LocalDate.now().plusMonths(1), LocalDate.now().getYear(),
-		LocalDate.now().getMonthValue(), 1);
-    }
+    @Column(length = 512)
+    private String remarks;
 
-    public Cutoff(EnumCutoffStatus status, LocalDate startDate, LocalDate endDate, int year, int month,
-	    int cutoffNumber) {
-	this(0L, status, startDate, endDate, year, month, cutoffNumber);
-    }
-
-    public Cutoff(Long id, EnumCutoffStatus status, LocalDate startDate, LocalDate endDate, int year, int month,
-	    int cutoffNumber) {
+    public Cutoff(Long id, boolean active, EnumCutoffStatus status, EnumCutoffFrequency frequency, LocalDate startDate, LocalDate endDate, int year,
+	    int month, int cutoffNumber, String remarks) {
 	this.id = id;
+	this.active = active;
 	this.status = status;
+	this.frequency = frequency;
 	this.startDate = startDate;
 	this.endDate = endDate;
 	this.year = year;
 	this.month = month;
 	this.cutoffNumber = cutoffNumber;
+	this.remarks = remarks;
 
 	payments = new ArrayList<Payment>();
 	penalties = new ArrayList<Penalty>();
+    }
+
+    public Cutoff() {
+	this(EnumCutoffFrequency.MONTHLY, LocalDate.now(), LocalDate.now().plusMonths(1), LocalDate.now().getYear(),
+		LocalDate.now().getMonthValue(), 1, "");
+    }
+
+    public Cutoff(EnumCutoffFrequency frequency, LocalDate startDate, LocalDate endDate, int year, int month,
+	    int cutoffNumber, String remarks) {
+	this(0l, true, EnumCutoffStatus.DRAFT, frequency, startDate, endDate, year, month, cutoffNumber, remarks);
     }
 
     public Long getId() {
@@ -87,6 +94,14 @@ public class Cutoff {
 
     public void setId(Long id) {
 	this.id = id;
+    }
+
+    public boolean isActive() {
+	return active;
+    }
+
+    public void setActive(boolean active) {
+	this.active = active;
     }
 
     public EnumCutoffStatus getStatus() {
@@ -143,6 +158,14 @@ public class Cutoff {
 
     public void setFrequency(EnumCutoffFrequency frequency) {
 	this.frequency = frequency;
+    }
+
+    public String getRemarks() {
+	return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+	this.remarks = remarks;
     }
 
     public List<Payment> getPayments() {

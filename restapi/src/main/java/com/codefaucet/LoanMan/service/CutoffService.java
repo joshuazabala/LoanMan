@@ -1,18 +1,18 @@
 package com.codefaucet.LoanMan.service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.codefaucet.LoanMan.common.EnumCutoffFrequency;
 import com.codefaucet.LoanMan.common.EnumCutoffStatus;
+import com.codefaucet.LoanMan.common.PagedSearchRequest;
 import com.codefaucet.LoanMan.model.Cutoff;
 import com.codefaucet.LoanMan.repository.ICutoffRepository;
 
@@ -31,11 +31,29 @@ public class CutoffService {
     @Value("${cutoff.semimonthly.start.second}")
     private int semiMonthlySecondCutoffStart;
     
-    public List<Cutoff> search(int year, List<EnumCutoffStatus> statusFilter,
-	    List<EnumCutoffFrequency> frequencyFilter) {
-	Sort sort = Sort.by(Order.desc("startDate"));
-	Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
-	List<Cutoff> cutoffs = cutoffRepository.search(year, statusFilter, frequencyFilter, pageable);
+    private DateTimeFormatter cutoffDisplayDateFormatter = DateTimeFormatter.ofPattern("MMM yyyy");
+    
+    public List<Cutoff> search(PagedSearchRequest param) {
+	Sort sort = param.createSorter();
+	List<EnumCutoffStatus> cutoffStatusFilter = new ArrayList<EnumCutoffStatus>();
+	String statusesString = (String) param.getOtherData().get("statuses");
+	for (String statusString : statusesString.split(",")) {
+	    EnumCutoffStatus status = EnumCutoffStatus.valueOf(statusString);
+	    cutoffStatusFilter.add(status);
+	}
+
+	List<EnumCutoffFrequency> frequencyFilter = new ArrayList<EnumCutoffFrequency>();
+	EnumCutoffFrequency frequency = EnumCutoffFrequency.valueOf((String) param.getOtherData().get("frequency"));
+	if (frequency == EnumCutoffFrequency.UNKNOWN || frequency == EnumCutoffFrequency.MONTHLY) {
+	    frequencyFilter.add(EnumCutoffFrequency.MONTHLY);
+	}
+	if (frequency == EnumCutoffFrequency.UNKNOWN || frequency == EnumCutoffFrequency.SEMI_MONTHLY) {
+	    frequencyFilter.add(EnumCutoffFrequency.SEMI_MONTHLY);
+	}
+	
+	int year = (int) param.getOtherData().get("year");
+	
+	List<Cutoff> cutoffs = cutoffRepository.search(year, cutoffStatusFilter, frequencyFilter, param.createStatusFilter(), param.createPageable(sort));
 	return cutoffs;
     }
 
@@ -52,7 +70,8 @@ public class CutoffService {
     }
 
     public void delete(Cutoff cutoff) {
-	cutoffRepository.delete(cutoff);
+	cutoff.setActive(false);
+	cutoffRepository.save(cutoff);
     }
 
     public Cutoff findByCutoffNumber(EnumCutoffFrequency frequency, int year, int month, int cutoffNumber) {
@@ -115,6 +134,37 @@ public class CutoffService {
 	cutoff.setMonth(firstCutoffStartDate.getMonthValue());
 	
 	return cutoff;
+    }
+
+    public String createCutoffDisplay(Cutoff cutoff) {	
+	String text = cutoffDisplayDateFormatter.format(LocalDate.of(cutoff.getYear(), cutoff.getMonth(), 1));
+	if (cutoff.getFrequency() == EnumCutoffFrequency.SEMI_MONTHLY) {
+	    text += ", " + (cutoff.getCutoffNumber() == 1 ? "1st" : "2nd");
+	}
+	return text;
+    }
+
+    public void restore(Cutoff cutoff) {
+	cutoff.setActive(true);
+	cutoffRepository.save(cutoff);
+    }
+
+    public Cutoff create(Cutoff cutoff) {
+	return cutoffRepository.save(cutoff);
+    }
+
+    public Cutoff edit(Cutoff cutoff) {
+	return cutoffRepository.save(cutoff);
+    }
+
+    public void post(Cutoff cutoff) {
+	cutoff.setStatus(EnumCutoffStatus.POSTED);
+	cutoffRepository.save(cutoff);
+    }
+
+    public void unpost(Cutoff cutoff) {
+	cutoff.setStatus(EnumCutoffStatus.DRAFT);
+	cutoffRepository.save(cutoff);
     }
     
 }

@@ -15,17 +15,17 @@ import com.codefaucet.LoanMan.model.Cutoff;
 @Repository
 public interface ICutoffRepository extends JpaRepository<Cutoff, Long> {
 
-    @Query("select c from Cutoff c where c.year = :year and c.status in :statusFilter and c.frequency in :frequencyFilter")
-    List<Cutoff> search(int year, List<EnumCutoffStatus> statusFilter, List<EnumCutoffFrequency> frequencyFilter,
+    @Query("select c from Cutoff c where (:year = 0 or c.year = :year) and c.status in :cutoffStatusFilter and c.frequency in :frequencyFilter and c.active in :statusFilter")
+    List<Cutoff> search(int year, List<EnumCutoffStatus> cutoffStatusFilter, List<EnumCutoffFrequency> frequencyFilter, List<Boolean> statusFilter, 
 	    Pageable pageable);
 
     @Query("select c from Cutoff c where c.startDate = (select max(c2.startDate) from Cutoff c2 where c2.frequency = :frequency)")
     Cutoff getLastPostedCutoff(EnumCutoffFrequency frequency);
 
-    @Query("select c from Cutoff c where c.frequency = :frequency and c.year = :year and month = :month and cutoffNumber = :cutoffNumber")
+    @Query("select c from Cutoff c where c.active = true and c.frequency = :frequency and c.year = :year and month = :month and cutoffNumber = :cutoffNumber")
     Cutoff findByCutoffNumber(EnumCutoffFrequency frequency, int year, int month, int cutoffNumber);
 
-    @Query("select c from Cutoff c where c.frequency = :frequency and c.startDate >= :date and c.endDate <= :date")
+    @Query("select c from Cutoff c where c.active = true and c.frequency = :frequency and c.startDate >= :date and c.endDate <= :date")
     Cutoff findByDate(EnumCutoffFrequency frequency, LocalDate date);
 
 }

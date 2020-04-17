@@ -8,6 +8,7 @@ import com.codefaucet.LoanMan.common.EnumCutoffStatus;
 public class CutoffDTO {
 
     private long id;
+    private boolean active;
     private EnumCutoffStatus status;
     private EnumCutoffFrequency frequency;
     private LocalDate startDate;
@@ -15,10 +16,12 @@ public class CutoffDTO {
     private int year;
     private int month;
     private int cutoffNumber;
+    private String remarks;
 
-    public CutoffDTO(long id, EnumCutoffStatus status, EnumCutoffFrequency frequency, LocalDate startDate,
-	    LocalDate endDate, int year, int month, int cutoffNumber) {
+    public CutoffDTO(long id, boolean active, EnumCutoffStatus status, EnumCutoffFrequency frequency,
+	    LocalDate startDate, LocalDate endDate, int year, int month, int cutoffNumber, String remarks) {
 	this.id = id;
+	this.active = active;
 	this.status = status;
 	this.frequency = frequency;
 	this.startDate = startDate;
@@ -26,10 +29,17 @@ public class CutoffDTO {
 	this.year = year;
 	this.month = month;
 	this.cutoffNumber = cutoffNumber;
+	this.remarks = remarks;
+    }
+
+    public CutoffDTO(EnumCutoffFrequency frequency, LocalDate startDate, LocalDate endDate, int year, int month,
+	    int cutoffNumber, String remarks) {
+	this(0l, true, EnumCutoffStatus.DRAFT, EnumCutoffFrequency.MONTHLY, LocalDate.now(), LocalDate.now(), 2020, 3,
+		1, "");
     }
 
     public CutoffDTO() {
-	this(0l, EnumCutoffStatus.DRAFT, EnumCutoffFrequency.MONTHLY, LocalDate.now(), LocalDate.now(), 2020, 3, 1);
+	this(EnumCutoffFrequency.MONTHLY, LocalDate.now(), LocalDate.now(), 2020, 3, 1, "");
     }
 
     public long getId() {
@@ -38,6 +48,14 @@ public class CutoffDTO {
 
     public void setId(long id) {
 	this.id = id;
+    }
+
+    public boolean isActive() {
+	return active;
+    }
+
+    public void setActive(boolean active) {
+	this.active = active;
     }
 
     public EnumCutoffStatus getStatus() {
@@ -94,6 +112,14 @@ public class CutoffDTO {
 
     public void setCutoffNumber(int cutoffNumber) {
 	this.cutoffNumber = cutoffNumber;
+    }
+
+    public String getRemarks() {
+	return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+	this.remarks = remarks;
     }
 
 }
